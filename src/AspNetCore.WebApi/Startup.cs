@@ -23,10 +23,19 @@ namespace AspNetCore.WebApi
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<DroidType>();
+            services.AddSingleton<TestQuery>();
+            services.AddSingleton<ISchema, TestSchema>();
+
             services.AddGraphQL(options =>
             {
-                options.EnableMetrics = true;
+                options.EnableMetrics = false;
                 options.ExposeExceptions = true;
+            });
+
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.AllowSynchronousIO = true;
             });
         }
 
