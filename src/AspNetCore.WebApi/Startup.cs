@@ -23,7 +23,15 @@ namespace AspNetCore.WebApi
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<Order_By>();
+            services.AddSingleton<Int_Comparison_Expr>();
+            services.AddSingleton<String_Comparison_Expr>();
+
             services.AddSingleton<DroidType>();
+            services.AddSingleton<Droid_Select_Column>();
+            services.AddSingleton<Droid_Order_By>();
+            services.AddSingleton<Droid_Bool_Expr>();
+
             services.AddSingleton<TestQuery>();
             services.AddSingleton<ISchema, TestSchema>();
 
