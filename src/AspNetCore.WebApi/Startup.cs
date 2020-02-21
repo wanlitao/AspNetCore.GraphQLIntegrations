@@ -1,5 +1,6 @@
 using GraphQL.Server;
 using GraphQL.Types;
+using HEF.GraphQL.ResourceQuery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,14 +24,13 @@ namespace AspNetCore.WebApi
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<Order_By>();
-            services.AddSingleton<Int_Comparison_Expr>();
-            services.AddSingleton<String_Comparison_Expr>();
+            services.AddSingleton<OrderBy_Type>();
+            services.AddSingleton<IntComparisonExpr_Type>();
+            services.AddSingleton<StringComparisonExpr_Type>();
 
-            services.AddSingleton<DroidType>();
-            services.AddSingleton<Droid_Select_Column>();
-            services.AddSingleton<Droid_Order_By>();
-            services.AddSingleton<Droid_Bool_Expr>();
+            services.AddSingleton<DroidType>();            
+            services.AddSingleton<Droid_OrderBy_Type>();
+            services.AddSingleton<Droid_Bool_Expr_Type>();
 
             services.AddSingleton<TestQuery>();
             services.AddSingleton<ISchema, TestSchema>();

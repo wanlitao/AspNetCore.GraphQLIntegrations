@@ -1,4 +1,7 @@
-﻿using GraphQL.Types;
+﻿using GraphQL;
+using GraphQL.Types;
+using HEF.GraphQL.ResourceQuery;
+using System.Collections.Generic;
 
 namespace AspNetCore.WebApi
 {
@@ -7,15 +10,22 @@ namespace AspNetCore.WebApi
         public TestQuery()
         {
             Field<ListGraphType<NonNullGraphType<DroidType>>>(
-              "Droid",
-              arguments: new QueryArguments(
-                  //new QueryArgument<ListGraphType<NonNullGraphType<Droid_Select_Column>>> { Name = "distinct_on" },
-                  new QueryArgument<IntGraphType> { Name = "limit" },
-                  new QueryArgument<IntGraphType> { Name = "offset" },
-                  new QueryArgument<ListGraphType<NonNullGraphType<Droid_Order_By>>> { Name = "order_by" },
-                  new QueryArgument<Droid_Bool_Expr> { Name = "where" }
-              ),
-              resolve: context => new[] { new Droid { Id = 1, Name = "R1-D2" }, new Droid { Id = 2, Name = "R2-D3" } }
+                "Droid",
+                arguments: new QueryArguments(                    
+                    new QueryArgument<IntGraphType> { Name = "limit" },
+                    new QueryArgument<IntGraphType> { Name = "offset" },
+                    new QueryArgument<ListGraphType<NonNullGraphType<Droid_OrderBy_Type>>> { Name = "order_by" },
+                    new QueryArgument<Droid_Bool_Expr_Type> { Name = "where" }
+                ),
+                resolve: context =>
+                {
+                    var limit = context.GetArgument<int>("limit");
+                    var offset = context.GetArgument<int>("offset");
+                    var orderBy = context.GetArgument<IList<Droid_OrderBy>>("order_by");
+                    var where = context.GetArgument<Droid_Bool_Expr>("where");
+
+                    return new[] { new Droid { Id = 1, Name = "R1-D2" }, new Droid { Id = 2, Name = "R2-D3" } };
+                }
             );
         }
     }
@@ -35,85 +45,45 @@ namespace AspNetCore.WebApi
         }
     }
 
-    public class Droid_Select_Column : EnumerationGraphType
+    public class Droid_OrderBy
     {
-        public Droid_Select_Column()
-        {
-            Description = "select columns of table \"Droid\"";
-            AddValue("id", "column name", 0);
-            AddValue("name", "column name", 1);
-        }
+        public OrderBy id { get; set; }
+
+        public OrderBy name { get; set; }
     }
 
-    public class Droid_Order_By : InputObjectGraphType
+    public class Droid_OrderBy_Type : InputObjectGraphType
     {
-        public Droid_Order_By()
+        public Droid_OrderBy_Type()
         {
             Description = "ordering options when selecting data from \"Droid\"";
-            Field<Order_By>("id");
-            Field<Order_By>("name");
+            Field<OrderBy_Type>("id");
+            Field<OrderBy_Type>("name");
         }
     }
 
-    public class Droid_Bool_Expr : InputObjectGraphType
+    public class Droid_Bool_Expr
     {
-        public Droid_Bool_Expr()
+        public Droid_Bool_Expr[] _and { get; set; }
+
+        public Droid_Bool_Expr[] _or { get; set; }
+
+        public IntComparisonExpr id { get; set; }
+
+        public StringComparisonExpr name { get; set; }
+    }
+
+    public class Droid_Bool_Expr_Type : InputObjectGraphType
+    {
+        public Droid_Bool_Expr_Type()
         {
             Description = "Boolean expression to filter rows from the table \"Droid\". All fields are combined with a logical 'AND'.";
 
-            Field<ListGraphType<Droid_Bool_Expr>>("_and");
-            Field<ListGraphType<Droid_Bool_Expr>>("_or");
+            Field<ListGraphType<Droid_Bool_Expr_Type>>("_and");
+            Field<ListGraphType<Droid_Bool_Expr_Type>>("_or");
 
-            Field<Int_Comparison_Expr>("id");
-            Field<String_Comparison_Expr>("name");
-        }
-    }
-
-    public class Order_By : EnumerationGraphType
-    {
-        public Order_By()
-        {
-            Description = "column ordering options";
-            AddValue("asc", "in the ascending order", 0);
-            AddValue("desc", "in the descending order", 1);
-        }
-    }
-
-    public class Int_Comparison_Expr : InputObjectGraphType
-    {
-        public Int_Comparison_Expr()
-        {
-            Description = "expression to compare columns of type Int. All fields are combined with logical 'AND'.";
-            Field<IntGraphType>("_eq");
-            Field<IntGraphType>("_gt");
-            Field<IntGraphType>("_gte");
-            Field<IntGraphType>("_lt");
-            Field<IntGraphType>("_lte");
-            Field<BooleanGraphType>("_is_null");
-            Field<ListGraphType<IntGraphType>>("_in");
-            Field<IntGraphType>("_neq");
-            Field<ListGraphType<IntGraphType>>("_nin");
-        }
-    }
-
-    public class String_Comparison_Expr : InputObjectGraphType
-    {
-        public String_Comparison_Expr()
-        {
-            Description = "expression to compare columns of type String. All fields are combined with logical 'AND'.";
-            Field<StringGraphType>("_eq");
-            Field<StringGraphType>("_gt");
-            Field<StringGraphType>("_gte");
-            Field<StringGraphType>("_lt");
-            Field<StringGraphType>("_lte");
-            Field<BooleanGraphType>("_is_null");
-            Field<ListGraphType<StringGraphType>>("_in");
-            Field<StringGraphType>("_neq");
-            Field<ListGraphType<StringGraphType>>("_nin");
-
-            Field<StringGraphType>("_prelike");
-            Field<StringGraphType>("_like");
-            Field<StringGraphType>("_suflike");
+            Field<IntComparisonExpr_Type>("id");
+            Field<StringComparisonExpr_Type>("name");
         }
     }
 }

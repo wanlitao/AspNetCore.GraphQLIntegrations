@@ -10,4 +10,8 @@
     <PackageReference Include="GraphQL.Server.Ui.GraphiQL" Version="3.5.0-alpha0043" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj" />
+  </ItemGroup>
+
 </Project>
