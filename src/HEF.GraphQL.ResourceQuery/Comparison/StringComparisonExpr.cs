@@ -29,20 +29,11 @@ namespace HEF.GraphQL.ResourceQuery
         public string _suflike { get; set; }
     }
 
-    public class StringComparisonExpr_Type : InputObjectGraphType
+    public class StringComparisonExpr_Type : ComparisonExpr_Type<StringGraphType>
     {
         public StringComparisonExpr_Type()
         {
             Description = "expression to compare columns of type String. All fields are combined with logical 'AND'.";
-            Field<StringGraphType>("_eq");
-            Field<StringGraphType>("_gt");
-            Field<StringGraphType>("_gte");
-            Field<StringGraphType>("_lt");
-            Field<StringGraphType>("_lte");
-            Field<BooleanGraphType>("_is_null");
-            Field<ListGraphType<NonNullGraphType<StringGraphType>>>("_in");
-            Field<StringGraphType>("_neq");
-            Field<ListGraphType<NonNullGraphType<StringGraphType>>>("_nin");
 
             Field<StringGraphType>("_prelike");
             Field<StringGraphType>("_like");

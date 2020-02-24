@@ -28,11 +28,11 @@ namespace AspNetCore.WebApi
             services.AddSingleton<IntComparisonExpr_Type>();
             services.AddSingleton<StringComparisonExpr_Type>();
 
-            services.AddSingleton<DroidType>();            
+            services.AddSingleton<DroidType>();
             services.AddSingleton<Droid_OrderBy_Type>();
             services.AddSingleton<Droid_Bool_Expr_Type>();
 
-            services.AddSingleton<TestQuery>();
+            services.AddSingleton<TestQuery_Root>();
             services.AddSingleton<ISchema, TestSchema>();
 
             services.AddGraphQL(options =>
@@ -58,6 +58,7 @@ namespace AspNetCore.WebApi
             app.UseGraphQL<ISchema>();
 
             app.UseGraphiQLServer();
+            app.UseGraphQLPlayground();
         }
     }
 }

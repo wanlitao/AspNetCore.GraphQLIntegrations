@@ -9,7 +9,7 @@ namespace AspNetCore.WebApi
         public TestSchema(IServiceProvider serviceProvider)
             : base(serviceProvider)
         {
-            Query = serviceProvider.GetRequiredService<TestQuery>();
+            Query = serviceProvider.GetRequiredService<TestQuery_Root>();
         }
     }
 }

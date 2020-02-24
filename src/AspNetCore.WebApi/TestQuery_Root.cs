@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace AspNetCore.WebApi
 {
-    public class TestQuery : ObjectGraphType
+    public class TestQuery_Root : ObjectGraphType
     {
-        public TestQuery()
+        public TestQuery_Root()
         {
             Field<ListGraphType<NonNullGraphType<DroidType>>>(
                 "Droid",
