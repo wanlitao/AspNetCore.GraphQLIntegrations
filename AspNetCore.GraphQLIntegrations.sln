@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.WebApi", "src\AspNetCore.WebApi\AspNetCore.WebApi.csproj", "{9C79D3D6-E2A6-45E4-A1CB-A48B936D104B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HEF.GraphQL.ResourceQuery", "src\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj", "{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.ResourceQuery", "src\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj", "{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HEF.GraphQL.AspNetCore", "src\HEF.GraphQL.AspNetCore\HEF.GraphQL.AspNetCore.csproj", "{07ABFFF7-92E4-48DC-9253-2944C7B48C34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07ABFFF7-92E4-48DC-9253-2944C7B48C34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07ABFFF7-92E4-48DC-9253-2944C7B48C34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07ABFFF7-92E4-48DC-9253-2944C7B48C34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07ABFFF7-92E4-48DC-9253-2944C7B48C34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
