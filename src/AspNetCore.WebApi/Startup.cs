@@ -1,6 +1,7 @@
 using GraphQL.Server;
 using GraphQL.Server.Internal;
 using GraphQL.Server.Transports.AspNetCore;
+using GraphQL.Server.Transports.AspNetCore.Common;
 using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
@@ -34,6 +35,7 @@ namespace AspNetCore.WebApi
             services.AddSingleton<IntComparisonExpr_Type>();
             services.AddSingleton<StringComparisonExpr_Type>();
 
+            services.AddSingleton<PackageType>();
             services.AddSingleton<DroidType>();
             services.AddSingleton<Droid_OrderBy_Type>();
             services.AddSingleton<Droid_Bool_Expr_Type>();
@@ -45,9 +47,11 @@ namespace AspNetCore.WebApi
             {
                 options.EnableMetrics = false;
                 options.ExposeExceptions = true;
-            });
-
-            services.AddTransient(typeof(IGraphQLExecuter<>), typeof(GraphQLExecuter<>));
+            })
+            .AddNewtonsoftJson()
+            .AddUserContextBuilder((context) => new TestGraphUserContext(context));
+            
+            services.AddTransient(typeof(IGraphQLExecuter<>), typeof(TestGraphQLExecuter<>));
 
             services.Configure<IISServerOptions>(options =>
             {
@@ -63,13 +67,22 @@ namespace AspNetCore.WebApi
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseGraphQL<ISchema>();
+            app.UseGraphiQLServer();
+            app.UseGraphQLPlayground();
+
             app.MapWhen(IsPackageGraphQLRequestPath, app =>
             {
                 app.Use(async (context, next) =>
                 {
                     context.Request.Path.EndsWithSegments(new PathString("/graphql"), out PathString remainingPath);
+                    remainingPath.StartsWithSegments(new PathString("/packages"), out PathString remainingPath2);
 
-                    var graphqlMiddleware = new GraphQLHttpMiddleware<ISchema>((context) => next.Invoke(), context.Request.Path, (settings) => { });
+                    var packageName = remainingPath2.Value.Trim('/');
+                    context.Items.Add("package", packageName);
+
+                    var graphqlMiddleware = new GraphQLHttpMiddleware<ISchema>((context) => next.Invoke(), context.Request.Path,
+                        app.ApplicationServices.GetRequiredService<IGraphQLRequestDeserializer>());
                     await graphqlMiddleware.InvokeAsync(context);
                 });
             });

@@ -1,38 +1,12 @@
-﻿using GraphQL;
-using GraphQL.Types;
+﻿using GraphQL.Types;
 using HEF.GraphQL.ResourceQuery;
-using System.Collections.Generic;
 
 namespace AspNetCore.WebApi
 {
-    public class TestQuery_Root : ObjectGraphType
-    {
-        public TestQuery_Root()
-        {
-            Field<ListGraphType<NonNullGraphType<DroidType>>>(
-                "Droid",
-                arguments: new QueryArguments(                    
-                    new QueryArgument<IntGraphType> { Name = "limit" },
-                    new QueryArgument<IntGraphType> { Name = "offset" },
-                    new QueryArgument<ListGraphType<NonNullGraphType<Droid_OrderBy_Type>>> { Name = "order_by" },
-                    new QueryArgument<Droid_Bool_Expr_Type> { Name = "where" }
-                ),
-                resolve: context =>
-                {
-                    var limit = context.GetArgument<int>("limit");
-                    var offset = context.GetArgument<int>("offset");
-                    var orderBy = context.GetArgument<IList<Droid_OrderBy>>("order_by");
-                    var where = context.GetArgument<Droid_Bool_Expr>("where");
-
-                    return new[] { new Droid { Id = 1, Name = "R1-D2" }, new Droid { Id = 2, Name = "R2-D3" } };
-                }
-            );
-        }
-    }
-
     public class Droid
     {
         public int Id { get; set; }
+
         public string Name { get; set; }
     }
 
