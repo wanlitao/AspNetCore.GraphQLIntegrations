@@ -15,6 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\HEF.GraphQL.AspNetCore\HEF.GraphQL.AspNetCore.csproj" />
     <ProjectReference Include="..\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj" />
+    <ProjectReference Include="..\HEF.GraphQL.Server\HEF.GraphQL.Server.csproj" />
   </ItemGroup>
 
 </Project>

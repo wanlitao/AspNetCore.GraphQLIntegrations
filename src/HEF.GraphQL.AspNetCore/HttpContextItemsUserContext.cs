@@ -2,11 +2,11 @@
 using System;
 using System.Collections.Generic;
 
-namespace AspNetCore.WebApi
+namespace HEF.GraphQL.AspNetCore
 {
-    public class TestGraphUserContext : Dictionary<string, object>
+    public class HttpContextItemsUserContext : Dictionary<string, object>
     {
-        public TestGraphUserContext(HttpContext httpContext)
+        public HttpContextItemsUserContext(HttpContext httpContext)
         {
             Context = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
 
@@ -17,7 +17,7 @@ namespace AspNetCore.WebApi
 
         protected void FillHttpContextItems(HttpContext httpContext)
         {
-            foreach(var item in httpContext.Items)
+            foreach (var item in httpContext.Items)
             {
                 if (item.Key is string keyStr)
                 {

@@ -8,4 +8,9 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="3.5.0-alpha0048" />
+    <PackageReference Include="HEF.AspNetCore.Mvc" Version="1.0.1" />
+  </ItemGroup>
+
 </Project>

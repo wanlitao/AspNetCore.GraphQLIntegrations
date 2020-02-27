@@ -1,40 +1,21 @@
 ﻿using GraphQL;
-using GraphQL.Execution;
-using GraphQL.Server;
-using GraphQL.Server.Internal;
 using GraphQL.Types;
-using GraphQL.Validation;
-using Microsoft.Extensions.Options;
+using HEF.GraphQL.Server;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace AspNetCore.WebApi
 {
-    public class TestGraphQLExecuter<TSchema> : DefaultGraphQLExecuter<TSchema>, IGraphQLExecuter<TSchema>
-        where TSchema : ISchema
+    public class PackageSchemaExecOptionsConfigHandler : IExecOptionsConfigHandler
     {
-        public TestGraphQLExecuter(
-            TSchema schema,
-            IDocumentExecuter documentExecuter,
-            IOptions<GraphQLOptions> options,
-            IEnumerable<IDocumentExecutionListener> listeners,
-            IEnumerable<IValidationRule> validationRules)
-            : base(schema, documentExecuter, options, listeners, validationRules)
-        { }
-
-        protected override ExecutionOptions GetOptions(string operationName, string query, Inputs variables, IDictionary<string, object> context, CancellationToken cancellationToken)
+        public void Configure(ExecutionOptions options)
         {
-            var options = base.GetOptions(operationName, query, variables, context, cancellationToken);
-
-            var packageName = GetContextPackageName(context);
+            var packageName = GetContextPackageName(options.UserContext);
             if (string.IsNullOrWhiteSpace(packageName))
-                return options;
+                return;
 
             var packageSchema = GetPackageSchema(packageName);
             options.Schema = packageSchema;
-
-            return options;
         }
 
         private string GetContextPackageName(IDictionary<string, object> context)
@@ -53,7 +34,7 @@ namespace AspNetCore.WebApi
         private ISchema GetPackageSchema(string packageName)
         {
             if (string.IsNullOrWhiteSpace(packageName))
-                throw new ArgumentNullException(nameof(packageName));            
+                throw new ArgumentNullException(nameof(packageName));
 
             var root = new ObjectGraphType { Name = $"{packageName}_Query_Root", Description = $"query root for package: {packageName}" };
             root.Field<ListGraphType<NonNullGraphType<DroidType>>>(
@@ -64,7 +45,7 @@ namespace AspNetCore.WebApi
                     new QueryArgument<ListGraphType<NonNullGraphType<Droid_OrderBy_Type>>> { Name = "order_by" },
                     new QueryArgument<Droid_Bool_Expr_Type> { Name = "where" }
                 ),
-                resolve: context => 
+                resolve: context =>
                 {
                     var limit = context.GetArgument<int>("limit");
                     var offset = context.GetArgument<int>("offset");

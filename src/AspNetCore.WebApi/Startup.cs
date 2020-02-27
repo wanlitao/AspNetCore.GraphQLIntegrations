@@ -1,5 +1,4 @@
 using GraphQL.Server;
-using GraphQL.Server.Internal;
 using GraphQL.Server.Transports.AspNetCore;
 using GraphQL.Server.Transports.AspNetCore.Common;
 using GraphQL.Server.Ui.GraphiQL;
@@ -7,6 +6,7 @@ using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
 using HEF.GraphQL.AspNetCore;
 using HEF.GraphQL.ResourceQuery;
+using HEF.GraphQL.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -49,9 +49,8 @@ namespace AspNetCore.WebApi
                 options.ExposeExceptions = true;
             })
             .AddNewtonsoftJson()
-            .AddUserContextBuilder((context) => new TestGraphUserContext(context));
-            
-            services.AddTransient(typeof(IGraphQLExecuter<>), typeof(TestGraphQLExecuter<>));
+            .AddUserContextBuilder((ctx) => new HttpContextItemsUserContext(ctx))
+            .AddExecOptionsConfigHandler<PackageSchemaExecOptionsConfigHandler>();
 
             services.Configure<IISServerOptions>(options =>
             {
@@ -67,9 +66,9 @@ namespace AspNetCore.WebApi
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseGraphQL<ISchema>();
-            app.UseGraphiQLServer();
-            app.UseGraphQLPlayground();
+            app.UseGraphQL<ISchema>("/packages/graphql");
+            app.UseGraphiQLServer(new GraphiQLOptions { Path = "/packages/graphiql", GraphQLEndPoint = "/packages/graphql" });
+            app.UseGraphQLPlayground(new GraphQLPlaygroundOptions { Path = "/packages/ui/playground", GraphQLEndPoint = "/packages/graphql" });
 
             app.MapWhen(IsPackageGraphQLRequestPath, app =>
             {
