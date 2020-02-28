@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace HEF.GraphQL.AspNetCore
+namespace HEF.GraphQL.Server.AspNetCore
 {
     public class HttpContextItemsUserContext : Dictionary<string, object>
     {

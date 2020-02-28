@@ -13,8 +13,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HEF.GraphQL.AspNetCore\HEF.GraphQL.AspNetCore.csproj" />
     <ProjectReference Include="..\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj" />
+    <ProjectReference Include="..\HEF.GraphQL.Server.AspNetCore\HEF.GraphQL.Server.AspNetCore.csproj" />
+    <ProjectReference Include="..\HEF.GraphQL.Server.Ui.GraphiQL\HEF.GraphQL.Server.Ui.GraphiQL.csproj" />
+    <ProjectReference Include="..\HEF.GraphQL.Server.Ui.Playground\HEF.GraphQL.Server.Ui.Playground.csproj" />
     <ProjectReference Include="..\HEF.GraphQL.Server\HEF.GraphQL.Server.csproj" />
   </ItemGroup>
 

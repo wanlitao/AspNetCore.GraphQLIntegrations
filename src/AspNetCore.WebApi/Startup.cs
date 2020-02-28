@@ -1,12 +1,9 @@
 using GraphQL.Server;
-using GraphQL.Server.Transports.AspNetCore;
-using GraphQL.Server.Transports.AspNetCore.Common;
 using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
-using HEF.GraphQL.AspNetCore;
 using HEF.GraphQL.ResourceQuery;
-using HEF.GraphQL.Server;
+using HEF.GraphQL.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -36,9 +33,9 @@ namespace AspNetCore.WebApi
             services.AddSingleton<StringComparisonExpr_Type>();
 
             services.AddSingleton<PackageType>();
-            services.AddSingleton<DroidType>();
-            services.AddSingleton<Droid_OrderBy_Type>();
-            services.AddSingleton<Droid_Bool_Expr_Type>();
+            //services.AddSingleton<DroidType>();
+            //services.AddSingleton<Droid_OrderBy_Type>();
+            //services.AddSingleton<Droid_Bool_Expr_Type>();
 
             services.AddSingleton<TestQuery_Root>();
             services.AddSingleton<ISchema, TestSchema>();
@@ -70,68 +67,17 @@ namespace AspNetCore.WebApi
             app.UseGraphiQLServer(new GraphiQLOptions { Path = "/packages/graphiql", GraphQLEndPoint = "/packages/graphql" });
             app.UseGraphQLPlayground(new GraphQLPlaygroundOptions { Path = "/packages/ui/playground", GraphQLEndPoint = "/packages/graphql" });
 
-            app.MapWhen(IsPackageGraphQLRequestPath, app =>
+            app.UseRoutingGraphQL<ISchema>("/packages", "/graphql", (context) =>
             {
-                app.Use(async (context, next) =>
-                {
-                    context.Request.Path.EndsWithSegments(new PathString("/graphql"), out PathString remainingPath);
-                    remainingPath.StartsWithSegments(new PathString("/packages"), out PathString remainingPath2);
+                context.Request.Path.EndsWithSegments(new PathString("/graphql"), out PathString remainingPath);
+                remainingPath.StartsWithSegments(new PathString("/packages"), out PathString remainingPath2);
 
-                    var packageName = remainingPath2.Value.Trim('/');
-                    context.Items.Add("package", packageName);
-
-                    var graphqlMiddleware = new GraphQLHttpMiddleware<ISchema>((context) => next.Invoke(), context.Request.Path,
-                        app.ApplicationServices.GetRequiredService<IGraphQLRequestDeserializer>());
-                    await graphqlMiddleware.InvokeAsync(context);
-                });
+                var packageName = remainingPath2.Value.Trim('/');
+                context.Items.Add("package", packageName);
             });
 
-            app.MapWhen(IsPackageGraphiQLRequestPath, app =>
-            {
-                app.Use(async (context, next) =>
-                {
-                    context.Request.Path.EndsWithSegments(new PathString("/graphiql"), out PathString remainingPath);
-
-                    var graphiqlOptions = new GraphiQLOptions { Path = context.Request.Path, GraphQLEndPoint = remainingPath + "/graphql" };
-
-                    var graphiqlMiddleware = new GraphiQLMiddleware((context) => next.Invoke(), graphiqlOptions);
-                    await graphiqlMiddleware.Invoke(context);
-                });
-            });
-
-            app.MapWhen(IsPackageGraphQLPlaygroundRequestPath, app =>
-            {
-                app.Use(async (context, next) =>
-                {
-                    context.Request.Path.EndsWithSegments(new PathString("/ui/playground"), out PathString remainingPath);
-
-                    var graphqlPlaygroundOptions = new GraphQLPlaygroundOptions { Path = context.Request.Path, GraphQLEndPoint = remainingPath + "/graphql" };
-
-                    var graphqlPlaygroundMiddleware = new PlaygroundMiddleware((context) => next.Invoke(), graphqlPlaygroundOptions);
-                    await graphqlPlaygroundMiddleware.Invoke(context);
-                });
-            });
-        }
-
-        private bool IsPackageGraphQLRequestPath(HttpContext context)
-        {
-            return !context.WebSockets.IsWebSocketRequest
-                && context.Request.Path.StartsWithSegments(new PathString("/packages"), out PathString remainingPath)
-                && remainingPath.EndsWithSegments(new PathString("/graphql"));
-        }
-
-        private bool IsPackageGraphiQLRequestPath(HttpContext context)
-        {
-            return !context.WebSockets.IsWebSocketRequest
-                && context.Request.Path.StartsWithSegments(new PathString("/packages"), out PathString remainingPath)
-                && remainingPath.EndsWithSegments(new PathString("/graphiql"));
-        }
-
-        private bool IsPackageGraphQLPlaygroundRequestPath(HttpContext context)
-        {
-            return !context.WebSockets.IsWebSocketRequest
-                && context.Request.Path.StartsWithSegments(new PathString("/packages"), out PathString remainingPath)
-                && remainingPath.EndsWithSegments(new PathString("/ui/playground"));
+            app.UseRoutingGraphiQLServer("/packages");
+            app.UseRoutingGraphQLPlayground("/packages");
         }
     }
 }
