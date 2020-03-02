@@ -2,6 +2,7 @@ using GraphQL.Server;
 using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
+using HEF.Entity.Mapper;
 using HEF.GraphQL.ResourceQuery;
 using HEF.GraphQL.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -40,6 +41,9 @@ namespace AspNetCore.WebApi
             services.AddSingleton<TestQuery_Root>();
             services.AddSingleton<ISchema, TestSchema>();
 
+            services.AddSingleton<IEntityMapperProvider>((provider) => new EntityMapperProvider(typeof(DbEntityMapper<>)));
+            services.AddSingleton<IEntityGraphTypeBuilder, EntityGraphTypeBuilder>();
+
             services.AddGraphQL(options =>
             {
                 options.EnableMetrics = false;
@@ -75,7 +79,6 @@ namespace AspNetCore.WebApi
                 var packageName = remainingPath2.Value.Trim('/');
                 context.Items.Add("package", packageName);
             });
-
             app.UseRoutingGraphiQLServer("/packages");
             app.UseRoutingGraphQLPlayground("/packages");
         }

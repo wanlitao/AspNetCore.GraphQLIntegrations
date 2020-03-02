@@ -9,6 +9,13 @@ namespace AspNetCore.WebApi
 {
     public class PackageSchemaExecOptionsConfigHandler : IExecOptionsConfigHandler
     {
+        public PackageSchemaExecOptionsConfigHandler(IEntityGraphTypeBuilder entityGraphTypeBuilder)
+        {
+            EntityGraphTypeBuilder = entityGraphTypeBuilder ?? throw new ArgumentNullException(nameof(entityGraphTypeBuilder));
+        }
+
+        protected IEntityGraphTypeBuilder EntityGraphTypeBuilder { get; }
+
         public void Configure(ExecutionOptions options)
         {
             var packageName = GetContextPackageName(options.UserContext);
@@ -37,9 +44,7 @@ namespace AspNetCore.WebApi
             if (string.IsNullOrWhiteSpace(packageName))
                 throw new ArgumentNullException(nameof(packageName));
 
-            var droidType = new ObjectGraphType<Droid>() { Name = "Droid_Type" };
-            droidType.Field(x => x.Id).Description("The Id of the Droid.");
-            droidType.Field(x => x.Name).Description("The name of the Droid.");
+            var droidType = EntityGraphTypeBuilder.Build<Droid>();
 
             var droidOrderByType = new InputObjectGraphType() { Name = "Droid_OrderBy_Type" };
             droidOrderByType.Description = $"ordering options when selecting data from {nameof(Droid)}";
@@ -48,8 +53,8 @@ namespace AspNetCore.WebApi
 
             var droidBoolExprType = new InputObjectGraphType() { Name = "Droid_Bool_Expr_Type" };
             droidBoolExprType.Description = $"Boolean expression to filter rows from the table {nameof(Droid)}. All fields are combined with a logical 'AND'.";
-            droidBoolExprType.Field(typeof(ListGraphType<>).MakeGenericType(droidBoolExprType.GetType()), "_and");
-            droidBoolExprType.Field(typeof(ListGraphType<>).MakeGenericType(droidBoolExprType.GetType()), "_or");
+            droidBoolExprType.Field("_and", new ListGraphType(droidBoolExprType));
+            droidBoolExprType.Field("_or", new ListGraphType(droidBoolExprType));
             droidBoolExprType.Field(typeof(IntComparisonExpr_Type), "id");
             droidBoolExprType.Field(typeof(StringComparisonExpr_Type), "name");
 
@@ -71,7 +76,7 @@ namespace AspNetCore.WebApi
                     var where = context.GetArgument<Droid_Bool_Expr>("where");
 
                     return new[] { new Droid { Id = 1, Name = $"{packageName}-R1-D2" }, new Droid { Id = 2, Name = $"{packageName}-R2-D3" } };
-                }); ;
+                });
 
             return new Schema { Query = root };
         }
