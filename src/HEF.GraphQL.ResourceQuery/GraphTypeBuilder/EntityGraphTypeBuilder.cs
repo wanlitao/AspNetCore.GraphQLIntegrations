@@ -58,6 +58,23 @@ namespace HEF.GraphQL.ResourceQuery
             return Expression.Lambda(delegateType, propertyExpr, parameterExpr);
         }
 
+        protected static IEnumerable<Expression> BuildObjectGraphFieldByPropertyMethodParamExpressions<TEntity>(
+            MethodInfo objectGraphFieldByPropertyMethod, IPropertyMap property)
+            where TEntity : class
+        {
+            var objectGraphFieldByPropertyMethodParameters = objectGraphFieldByPropertyMethod.GetParameters();
+
+            foreach(var methodParameter in objectGraphFieldByPropertyMethodParameters)
+            {
+                if (typeof(LambdaExpression).IsAssignableFrom(methodParameter.ParameterType))
+                {
+                    yield return BuildEntityPropertyExpression<TEntity>(property);
+                    continue;
+                }                
+                yield return Expression.Constant(methodParameter.DefaultValue, methodParameter.ParameterType);                
+            }
+        }
+
         protected Expression<Func<ObjectGraphType<TEntity>>> BuildEntityGraphTypeFactory<TEntity>(params IPropertyMap[] properties)
             where TEntity : class
         {
@@ -87,11 +104,10 @@ namespace HEF.GraphQL.ResourceQuery
 
                     // entityGraphType.Field(entity => entity.Property)
                     var objectGraphFieldByPropertyMethod = GetObjectGraphFieldByPropertyExpressionMethod<TEntity>().MakeGenericMethod(propertyType);
-                    var objectGraphFieldByPropertyMethodParameters = objectGraphFieldByPropertyMethod.GetParameters();
-                    var entityPropertyExpr = BuildEntityPropertyExpression<TEntity>(property);
-                    var fieldBuilderExpr = Expression.Call(entityGraphTypeVariableExpr, objectGraphFieldByPropertyMethod, entityPropertyExpr,
-                        Expression.Constant(objectGraphFieldByPropertyMethodParameters[1].DefaultValue, objectGraphFieldByPropertyMethodParameters[1].ParameterType),
-                        Expression.Constant(objectGraphFieldByPropertyMethodParameters[2].DefaultValue, objectGraphFieldByPropertyMethodParameters[2].ParameterType));
+                    var objectGraphFieldByPropertyMethodParamExprs = 
+                        BuildObjectGraphFieldByPropertyMethodParamExpressions<TEntity>(objectGraphFieldByPropertyMethod, property);
+                    var fieldBuilderExpr = Expression.Call(entityGraphTypeVariableExpr, objectGraphFieldByPropertyMethod,
+                        objectGraphFieldByPropertyMethodParamExprs);
 
                     // ObjectGraphType.Field(entity => entity.Property).Description("The PropertyName of the EntityName.")
                     var fieldBuilderDescriptionMethod = GetFieldBuilderDescriptionMethod<TEntity>(propertyType);

@@ -10,7 +10,7 @@ namespace HEF.GraphQL.ResourceQuery
     {
         public DecimalComparisonExpr_Type()
         {
-            Description = "expression to compare columns of type Decimal. All fields are combined with logical 'AND'.";            
+            Description = "expression to compare columns of type Decimal. All fields are combined with logical 'AND'.";
         }
     }
 }

@@ -9,12 +9,17 @@ namespace AspNetCore.WebApi
 {
     public class PackageSchemaExecOptionsConfigHandler : IExecOptionsConfigHandler
     {
-        public PackageSchemaExecOptionsConfigHandler(IEntityGraphTypeBuilder entityGraphTypeBuilder)
+        public PackageSchemaExecOptionsConfigHandler(IEntityGraphTypeBuilder entityGraphTypeBuilder,
+            IEntityGraphQueryArgumentsBuilder entityGraphQueryArgumentsBuilder)
         {
             EntityGraphTypeBuilder = entityGraphTypeBuilder ?? throw new ArgumentNullException(nameof(entityGraphTypeBuilder));
+            EntityGraphQueryArgumentsBuilder = entityGraphQueryArgumentsBuilder
+                ?? throw new ArgumentNullException(nameof(entityGraphQueryArgumentsBuilder));
         }
 
         protected IEntityGraphTypeBuilder EntityGraphTypeBuilder { get; }
+
+        protected IEntityGraphQueryArgumentsBuilder EntityGraphQueryArgumentsBuilder { get; }
 
         public void Configure(ExecutionOptions options)
         {
@@ -46,28 +51,11 @@ namespace AspNetCore.WebApi
 
             var droidType = EntityGraphTypeBuilder.Build<Droid>();
 
-            var droidOrderByType = new InputObjectGraphType() { Name = "Droid_OrderBy_Type" };
-            droidOrderByType.Description = $"ordering options when selecting data from {nameof(Droid)}";
-            droidOrderByType.Field<OrderBy_Type>("id");
-            droidOrderByType.Field<OrderBy_Type>("name");
-
-            var droidBoolExprType = new InputObjectGraphType() { Name = "Droid_Bool_Expr_Type" };
-            droidBoolExprType.Description = $"Boolean expression to filter rows from the table {nameof(Droid)}. All fields are combined with a logical 'AND'.";
-            droidBoolExprType.Field("_and", new ListGraphType(droidBoolExprType));
-            droidBoolExprType.Field("_or", new ListGraphType(droidBoolExprType));
-            droidBoolExprType.Field(typeof(IntComparisonExpr_Type), "id");
-            droidBoolExprType.Field(typeof(StringComparisonExpr_Type), "name");
-
             var root = new ObjectGraphType { Name = $"{packageName}_Query_Root", Description = $"query root for package: {packageName}" };
             root.Field(
                 "Droid",
                 new ListGraphType(new NonNullGraphType(droidType)),
-                arguments: new QueryArguments(
-                    new QueryArgument<IntGraphType> { Name = "limit" },
-                    new QueryArgument<IntGraphType> { Name = "offset" },
-                    new QueryArgument(new ListGraphType(new NonNullGraphType(droidOrderByType))) { Name = "order_by" },
-                    new QueryArgument(droidBoolExprType) { Name = "where" }
-                ),
+                arguments: EntityGraphQueryArgumentsBuilder.Build<Droid>(),
                 resolve: context =>
                 {
                     var limit = context.GetArgument<int>("limit");

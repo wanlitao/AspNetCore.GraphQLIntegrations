@@ -43,6 +43,7 @@ namespace AspNetCore.WebApi
 
             services.AddSingleton<IEntityMapperProvider>((provider) => new EntityMapperProvider(typeof(DbEntityMapper<>)));
             services.AddSingleton<IEntityGraphTypeBuilder, EntityGraphTypeBuilder>();
+            services.AddSingleton<IEntityGraphQueryArgumentsBuilder, EntityGraphQueryArgumentsBuilder>();
 
             services.AddGraphQL(options =>
             {
