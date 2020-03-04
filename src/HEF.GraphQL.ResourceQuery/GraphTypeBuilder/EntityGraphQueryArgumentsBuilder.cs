@@ -25,9 +25,11 @@ namespace HEF.GraphQL.ResourceQuery
         {
             var entityMapper = MapperProvider.GetEntityMapper<TEntity>();
 
-            var entityOrderByGraphTypeFactory = BuildEntityOrderByGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray());
-            var entityOrderByType = entityOrderByGraphTypeFactory.Compile().Invoke();
+            var entityOrderByGraphTypeFactory = LambdaExpressionCache.GetLambdaExpression<Func<InputObjectGraphType>>(
+                $"{GetEntityOrderByTypeName<TEntity>()}_Factory",
+                (key) => BuildEntityOrderByGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray()));
 
+            var entityOrderByType = entityOrderByGraphTypeFactory.Compile().Invoke();
             return new QueryArgument(new ListGraphType(new NonNullGraphType(entityOrderByType))) { Name = "order_by" };
         }
 
@@ -35,9 +37,11 @@ namespace HEF.GraphQL.ResourceQuery
         {
             var entityMapper = MapperProvider.GetEntityMapper<TEntity>();
 
-            var entityPredicateGraphTypeFactory = BuildEntityPredicateGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray());
-            var entityPredicateType = entityPredicateGraphTypeFactory.Compile().Invoke();
+            var entityPredicateGraphTypeFactory = LambdaExpressionCache.GetLambdaExpression<Func<InputObjectGraphType>>(
+                $"{GetEntityPredicateTypeName<TEntity>()}_Factory",
+                (key) => BuildEntityPredicateGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray()));
 
+            var entityPredicateType = entityPredicateGraphTypeFactory.Compile().Invoke();
             return new QueryArgument(entityPredicateType) { Name = "where" };
         }
 
@@ -50,6 +54,32 @@ namespace HEF.GraphQL.ResourceQuery
                     BuildPredicate<TEntity>()
                 );
         }
+
+        #region Helper Functions
+        protected static Expression CreateObjectGraphAssignPropertyExpression(
+            ParameterExpression graphTypeVariableExpr,
+            Type graphType, string propertyName, Func<object> propertyValueGetter)
+        {
+            var graphTypeProperty = graphType.GetProperty(propertyName);
+            if (graphTypeProperty == null)
+                throw new ArgumentException($"not found property '{propertyName}' from the {graphType.Name}");
+
+            var graphTypePropertyExpr = Expression.Property(graphTypeVariableExpr, graphTypeProperty);
+            var graphTypePropertyValueExpr = Expression.Constant(propertyValueGetter.Invoke(), graphTypeProperty.PropertyType);
+
+            return Expression.Assign(graphTypePropertyExpr, graphTypePropertyValueExpr);
+        }
+
+        protected static Expression CreateObjectGraphFieldByGraphExpression(
+            ParameterExpression graphTypeVariableExpr,
+            Type propertyGraphType, IPropertyMap property)
+        {
+            var objectGraphFieldByGraphMethod = _objectGraphFieldByGenericGraphMethod.MakeGenericMethod(propertyGraphType);
+            var objectGraphFieldByGraphMethodParamExprs = BuildObjectGraphFieldByGraphMethodParamExpressions(objectGraphFieldByGraphMethod, property);
+
+            return Expression.Call(graphTypeVariableExpr, objectGraphFieldByGraphMethod, objectGraphFieldByGraphMethodParamExprs);
+        }
+        #endregion
 
         #region OrderBy
         protected virtual string GetEntityOrderByTypeName<TEntity>() where TEntity : class
@@ -94,17 +124,13 @@ namespace HEF.GraphQL.ResourceQuery
             bodyExprs.Add(assignEntityOrderByTypeVariableExpr);
 
             // entityOrderByType.Name = $"{EntityName}_OrderBy_Type";
-            var entityOrderByTypeNameProperty = entityOrderByGraphType.GetProperty(nameof(InputObjectGraphType.Name));
-            var entityOrderByTypeNamePropertyExpr = Expression.Property(entityOrderByTypeVariableExpr, entityOrderByTypeNameProperty);
-            var entityOrderByTypeNameExpr = Expression.Constant(GetEntityOrderByTypeName<TEntity>());
-            var assignEntityOrderByTypeNameExpr = Expression.Assign(entityOrderByTypeNamePropertyExpr, entityOrderByTypeNameExpr);
+            var assignEntityOrderByTypeNameExpr = CreateObjectGraphAssignPropertyExpression(entityOrderByTypeVariableExpr,
+                entityOrderByGraphType, nameof(InputObjectGraphType.Name), () => GetEntityOrderByTypeName<TEntity>());
             bodyExprs.Add(assignEntityOrderByTypeNameExpr);
 
             // entityOrderByType.Description = $"ordering options when selecting data from {EntityName}";
-            var entityOrderByTypeDescriptionProperty = entityOrderByGraphType.GetProperty(nameof(InputObjectGraphType.Description));
-            var entityOrderByTypeDescriptionPropertyExpr = Expression.Property(entityOrderByTypeVariableExpr, entityOrderByTypeDescriptionProperty);
-            var entityOrderByTypeDescriptionExpr = Expression.Constant(GetEntityOrderByTypeDescription<TEntity>());
-            var assignEntityOrderByTypeDescriptionExpr = Expression.Assign(entityOrderByTypeDescriptionPropertyExpr, entityOrderByTypeDescriptionExpr);
+            var assignEntityOrderByTypeDescriptionExpr = CreateObjectGraphAssignPropertyExpression(entityOrderByTypeVariableExpr,
+                entityOrderByGraphType, nameof(InputObjectGraphType.Description), () => GetEntityOrderByTypeDescription<TEntity>());
             bodyExprs.Add(assignEntityOrderByTypeDescriptionExpr);
 
             if (properties.IsNotEmpty())
@@ -112,11 +138,7 @@ namespace HEF.GraphQL.ResourceQuery
                 foreach (var property in properties)
                 {
                     // entityOrderByType.Field<OrderBy_Type>(property.Name)
-                    var objectGraphFieldByGraphMethod = _objectGraphFieldByGenericGraphMethod.MakeGenericMethod(typeof(OrderBy_Type));
-                    var objectGraphFieldByGraphMethodParamExprs = BuildObjectGraphFieldByGraphMethodParamExpressions(objectGraphFieldByGraphMethod, property);
-                    var fieldTypeExpr = Expression.Call(entityOrderByTypeVariableExpr, objectGraphFieldByGraphMethod,
-                        objectGraphFieldByGraphMethodParamExprs);
-
+                    var fieldTypeExpr = CreateObjectGraphFieldByGraphExpression(entityOrderByTypeVariableExpr, typeof(OrderBy_Type), property);
                     bodyExprs.Add(fieldTypeExpr);
                 }
             }
@@ -180,17 +202,13 @@ namespace HEF.GraphQL.ResourceQuery
             bodyExprs.Add(assignEntityPredicateTypeVariableExpr);
 
             // entityPredicateType.Name = $"{EntityName}_Predicate_Type";
-            var entityPredicateTypeNameProperty = entityPredicateGraphType.GetProperty(nameof(InputObjectGraphType.Name));
-            var entityPredicateTypeNamePropertyExpr = Expression.Property(entityPredicateTypeVariableExpr, entityPredicateTypeNameProperty);
-            var entityPredicateTypeNameExpr = Expression.Constant(GetEntityPredicateTypeName<TEntity>());
-            var assignEntityPredicateTypeNameExpr = Expression.Assign(entityPredicateTypeNamePropertyExpr, entityPredicateTypeNameExpr);
+            var assignEntityPredicateTypeNameExpr = CreateObjectGraphAssignPropertyExpression(entityPredicateTypeVariableExpr,
+                entityPredicateGraphType, nameof(InputObjectGraphType.Name), () => GetEntityPredicateTypeName<TEntity>());
             bodyExprs.Add(assignEntityPredicateTypeNameExpr);
 
             // entityPredicateType.Description = $"Boolean expression to filter rows from the resource {EntityName}. All fields are combined with a logical 'AND'.";
-            var entityPredicateTypeDescriptionProperty = entityPredicateGraphType.GetProperty(nameof(InputObjectGraphType.Description));
-            var entityPredicateTypeDescriptionPropertyExpr = Expression.Property(entityPredicateTypeVariableExpr, entityPredicateTypeDescriptionProperty);
-            var entityPredicateTypeDescriptionExpr = Expression.Constant(GetEntityPredicateTypeDescription<TEntity>());
-            var assignEntityPredicateTypeDescriptionExpr = Expression.Assign(entityPredicateTypeDescriptionPropertyExpr, entityPredicateTypeDescriptionExpr);
+            var assignEntityPredicateTypeDescriptionExpr = CreateObjectGraphAssignPropertyExpression(entityPredicateTypeVariableExpr,
+                entityPredicateGraphType, nameof(InputObjectGraphType.Description), () => GetEntityPredicateTypeDescription<TEntity>());
             bodyExprs.Add(assignEntityPredicateTypeDescriptionExpr);
 
             // entityPredicateType.Field("_and", new ListGraphType(entityPredicateType));
@@ -212,11 +230,9 @@ namespace HEF.GraphQL.ResourceQuery
                 {
                     // entityPredicateType.Field<ComparisonExpr_Type>(property.Name)
                     var propertyComparisonExprGraphType = property.PropertyInfo.PropertyType.GetComparisonExprGraphType();
-                    var objectGraphFieldByGraphMethod = _objectGraphFieldByGenericGraphMethod.MakeGenericMethod(propertyComparisonExprGraphType);
-                    var objectGraphFieldByGraphMethodParamExprs = BuildObjectGraphFieldByGraphMethodParamExpressions(objectGraphFieldByGraphMethod, property);
-                    var predicateComparisonFieldTypeExpr = Expression.Call(entityPredicateTypeVariableExpr, objectGraphFieldByGraphMethod,
-                        objectGraphFieldByGraphMethodParamExprs);
 
+                    var predicateComparisonFieldTypeExpr = CreateObjectGraphFieldByGraphExpression(
+                        entityPredicateTypeVariableExpr, propertyComparisonExprGraphType, property);
                     bodyExprs.Add(predicateComparisonFieldTypeExpr);
                 }
             }

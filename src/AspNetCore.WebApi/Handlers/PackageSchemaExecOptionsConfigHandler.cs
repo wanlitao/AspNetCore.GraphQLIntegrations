@@ -4,6 +4,7 @@ using HEF.GraphQL.ResourceQuery;
 using HEF.GraphQL.Server;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 
 namespace AspNetCore.WebApi
 {
@@ -58,10 +59,10 @@ namespace AspNetCore.WebApi
                 arguments: EntityGraphQueryArgumentsBuilder.Build<Droid>(),
                 resolve: context =>
                 {
-                    var limit = context.GetArgument<int>("limit");
-                    var offset = context.GetArgument<int>("offset");
-                    var orderBy = context.GetArgument<IList<Droid_OrderBy>>("order_by");
-                    var where = context.GetArgument<Droid_Bool_Expr>("where");
+                    var limit = context.GetArgument<int?>("limit");
+                    var offset = context.GetArgument<int?>("offset");
+                    var orderBy = context.GetArgument<IList<IDictionary<string, object>>>("order_by");
+                    var where = context.GetArgument<object>("where");
 
                     return new[] { new Droid { Id = 1, Name = $"{packageName}-R1-D2" }, new Droid { Id = 2, Name = $"{packageName}-R2-D3" } };
                 });
