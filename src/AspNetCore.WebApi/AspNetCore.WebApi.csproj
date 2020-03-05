@@ -6,14 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="3.5.0-alpha0048" />
-    <PackageReference Include="GraphQL.Server.Transports.AspNetCore.NewtonsoftJson" Version="3.5.0-alpha0048" />
-    <PackageReference Include="GraphQL.Server.Ui.GraphiQL" Version="3.5.0-alpha0048" />
-    <PackageReference Include="GraphQL.Server.Ui.Playground" Version="3.5.0-alpha0048" />
+    <PackageReference Include="GraphQL.Server.Transports.AspNetCore" Version="3.5.0-alpha0064" />
+    <PackageReference Include="GraphQL.Server.Transports.AspNetCore.NewtonsoftJson" Version="3.5.0-alpha0064" />
+    <PackageReference Include="GraphQL.Server.Ui.GraphiQL" Version="3.5.0-alpha0064" />
+    <PackageReference Include="GraphQL.Server.Ui.Playground" Version="3.5.0-alpha0064" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj" />
+    <ProjectReference Include="..\HEF.GraphQL.EntityQuery\HEF.GraphQL.EntityQuery.csproj" />
     <ProjectReference Include="..\HEF.GraphQL.Server.AspNetCore\HEF.GraphQL.Server.AspNetCore.csproj" />
     <ProjectReference Include="..\HEF.GraphQL.Server.Ui.GraphiQL\HEF.GraphQL.Server.Ui.GraphiQL.csproj" />
     <ProjectReference Include="..\HEF.GraphQL.Server.Ui.Playground\HEF.GraphQL.Server.Ui.Playground.csproj" />

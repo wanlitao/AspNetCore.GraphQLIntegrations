@@ -1,5 +1,4 @@
-﻿using GraphQL.Types;
-using HEF.GraphQL.ResourceQuery;
+﻿using HEF.GraphQL.EntityQuery;
 
 namespace AspNetCore.WebApi
 {

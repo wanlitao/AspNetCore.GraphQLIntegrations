@@ -1,8 +1,7 @@
-﻿using GraphQL.Types;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace HEF.GraphQL.ResourceQuery
+namespace HEF.GraphQL.EntityQuery
 {
     internal static class TypeExtensions
     {

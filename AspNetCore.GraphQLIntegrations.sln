@@ -5,15 +5,15 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore.WebApi", "src\AspNetCore.WebApi\AspNetCore.WebApi.csproj", "{9C79D3D6-E2A6-45E4-A1CB-A48B936D104B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.ResourceQuery", "src\HEF.GraphQL.ResourceQuery\HEF.GraphQL.ResourceQuery.csproj", "{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.Server", "src\HEF.GraphQL.Server\HEF.GraphQL.Server.csproj", "{6495C49E-DDED-4C08-956D-797577657CDC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.Server.AspNetCore", "src\HEF.GraphQL.Server.AspNetCore\HEF.GraphQL.Server.AspNetCore.csproj", "{1E37B934-F8E4-4E34-BFC2-A85196DBAC59}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.Server.Ui.GraphiQL", "src\HEF.GraphQL.Server.Ui.GraphiQL\HEF.GraphQL.Server.Ui.GraphiQL.csproj", "{075DDD32-E953-4F6F-BDAC-1677FF465C18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HEF.GraphQL.Server.Ui.Playground", "src\HEF.GraphQL.Server.Ui.Playground\HEF.GraphQL.Server.Ui.Playground.csproj", "{E57223EF-15D3-4095-BBC1-EBF9166EBB4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.Server.Ui.Playground", "src\HEF.GraphQL.Server.Ui.Playground\HEF.GraphQL.Server.Ui.Playground.csproj", "{E57223EF-15D3-4095-BBC1-EBF9166EBB4E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.EntityQuery", "src\HEF.GraphQL.EntityQuery\HEF.GraphQL.EntityQuery.csproj", "{4336C8E5-6D97-4465-B427-9BDA14AE97D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,6 @@ Global
 		{9C79D3D6-E2A6-45E4-A1CB-A48B936D104B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C79D3D6-E2A6-45E4-A1CB-A48B936D104B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C79D3D6-E2A6-45E4-A1CB-A48B936D104B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6F283E7-893D-4089-BBE7-E4B6CAFE33B5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6495C49E-DDED-4C08-956D-797577657CDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6495C49E-DDED-4C08-956D-797577657CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6495C49E-DDED-4C08-956D-797577657CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +41,10 @@ Global
 		{E57223EF-15D3-4095-BBC1-EBF9166EBB4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E57223EF-15D3-4095-BBC1-EBF9166EBB4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E57223EF-15D3-4095-BBC1-EBF9166EBB4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

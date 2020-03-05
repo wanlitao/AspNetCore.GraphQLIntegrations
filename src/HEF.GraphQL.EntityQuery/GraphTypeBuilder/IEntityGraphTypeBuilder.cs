@@ -1,6 +1,6 @@
 ﻿using GraphQL.Types;
 
-namespace HEF.GraphQL.ResourceQuery
+namespace HEF.GraphQL.EntityQuery
 {
     public interface IEntityGraphTypeBuilder
     {

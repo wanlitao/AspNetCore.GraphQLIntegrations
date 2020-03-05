@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 
-namespace HEF.GraphQL.ResourceQuery
+namespace HEF.GraphQL.EntityQuery
 {
     internal static class LambdaExpressionCache
     {

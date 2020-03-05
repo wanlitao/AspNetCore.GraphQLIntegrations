@@ -3,7 +3,7 @@ using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
 using HEF.Entity.Mapper;
-using HEF.GraphQL.ResourceQuery;
+using HEF.GraphQL.EntityQuery;
 using HEF.GraphQL.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

@@ -1,7 +1,7 @@
 ﻿using GraphQL.Types;
 using System;
 
-namespace HEF.GraphQL.ResourceQuery
+namespace HEF.GraphQL.EntityQuery
 {
     public class DateTimeComparisonExpr : ComparisonExpr<DateTime>
     {        

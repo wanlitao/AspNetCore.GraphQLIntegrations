@@ -8,7 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace HEF.GraphQL.ResourceQuery
+namespace HEF.GraphQL.EntityQuery
 {
     public class EntityGraphTypeBuilder : IEntityGraphTypeBuilder
     {
@@ -51,15 +51,6 @@ namespace HEF.GraphQL.ResourceQuery
                 .GetDeclaredMethods(nameof(FieldBuilder<object, object>.Description))
                 .Single();
 
-        protected static LambdaExpression BuildEntityPropertyExpression<TEntity>(IPropertyMap property) where TEntity : class
-        {
-            var parameterExpr = Expression.Parameter(typeof(TEntity), "entity");
-            var propertyExpr = Expression.Property(parameterExpr, property.PropertyInfo);
-
-            var delegateType = Expression.GetFuncType(typeof(TEntity), property.PropertyInfo.PropertyType);
-            return Expression.Lambda(delegateType, propertyExpr, parameterExpr);
-        }
-
         protected static IEnumerable<Expression> BuildObjectGraphFieldByPropertyMethodParamExpressions<TEntity>(
             MethodInfo objectGraphFieldByPropertyMethod, IPropertyMap property)
             where TEntity : class
@@ -70,7 +61,7 @@ namespace HEF.GraphQL.ResourceQuery
             {
                 if (typeof(LambdaExpression).IsAssignableFrom(methodParameter.ParameterType))
                 {
-                    yield return BuildEntityPropertyExpression<TEntity>(property);
+                    yield return ExpressionFactory.BuildEntityPropertyExpression<TEntity>(property);
                     continue;
                 }                
                 yield return Expression.Constant(methodParameter.DefaultValue, methodParameter.ParameterType);                

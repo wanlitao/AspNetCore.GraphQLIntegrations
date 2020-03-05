@@ -7,12 +7,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace HEF.GraphQL.ResourceQuery
+namespace HEF.GraphQL.EntityQuery
 {
     public class EntityGraphQueryArgumentsBuilder : IEntityGraphQueryArgumentsBuilder
     {
-        protected static readonly QueryArgument LimitQueryArgument = new QueryArgument<IntGraphType> { Name = "limit" };
-        protected static readonly QueryArgument OffsetQueryArgument = new QueryArgument<IntGraphType> { Name = "offset" };
+        protected static readonly QueryArgument LimitQueryArgument = 
+            new QueryArgument<IntGraphType> { Name = EntityGraphQueryConstants.GraphQueryArgumnet_Limit_Name };
+        protected static readonly QueryArgument OffsetQueryArgument =
+            new QueryArgument<IntGraphType> { Name = EntityGraphQueryConstants.GraphQueryArgumnet_Offset_Name };
 
         public EntityGraphQueryArgumentsBuilder(IEntityMapperProvider mapperProvider)
         {
@@ -30,7 +32,10 @@ namespace HEF.GraphQL.ResourceQuery
                 (key) => BuildEntityOrderByGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray()));
 
             var entityOrderByType = entityOrderByGraphTypeFactory.Compile().Invoke();
-            return new QueryArgument(new ListGraphType(new NonNullGraphType(entityOrderByType))) { Name = "order_by" };
+            return new QueryArgument(new ListGraphType(new NonNullGraphType(entityOrderByType)))
+            {
+                Name = EntityGraphQueryConstants.GraphQueryArgumnet_OrderBy_Name
+            };
         }
 
         public QueryArgument BuildPredicate<TEntity>() where TEntity : class
@@ -42,7 +47,7 @@ namespace HEF.GraphQL.ResourceQuery
                 (key) => BuildEntityPredicateGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray()));
 
             var entityPredicateType = entityPredicateGraphTypeFactory.Compile().Invoke();
-            return new QueryArgument(entityPredicateType) { Name = "where" };
+            return new QueryArgument(entityPredicateType) { Name = EntityGraphQueryConstants.GraphQueryArgumnet_Where_Name };
         }
 
         public QueryArguments Build<TEntity>() where TEntity : class
