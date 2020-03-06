@@ -83,10 +83,8 @@ namespace HEF.GraphQL.EntityQuery
             bodyExprs.Add(assignEntityGraphTypeVariableExpr);
 
             // entityGraphType.Name = $"{EntityName}_Type";
-            var entityGraphTypeNameProperty = entityGraphType.GetProperty(nameof(ObjectGraphType.Name));
-            var entityGraphTypeNamePropertyExpr = Expression.Property(entityGraphTypeVariableExpr, entityGraphTypeNameProperty);
-            var entityGraphTypeNameExpr = Expression.Constant(GetEntityGraphTypeName<TEntity>());
-            var assignEntityGraphTypeNameExpr = Expression.Assign(entityGraphTypeNamePropertyExpr, entityGraphTypeNameExpr);
+            var assignEntityGraphTypeNameExpr = GraphTypeBuilder.CreateObjectGraphAssignPropertyExpression(
+                entityGraphTypeVariableExpr, entityGraphType, nameof(ObjectGraphType.Name), () => GetEntityGraphTypeName<TEntity>());
             bodyExprs.Add(assignEntityGraphTypeNameExpr);
 
             if (properties.IsNotEmpty())

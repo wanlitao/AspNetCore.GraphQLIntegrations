@@ -1,25 +1,37 @@
 ﻿using GraphQL;
 using GraphQL.Types;
+using HEF.Data.Query;
 using HEF.GraphQL.EntityQuery;
 using HEF.GraphQL.Server;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AspNetCore.WebApi
 {
     public class PackageSchemaExecOptionsConfigHandler : IExecOptionsConfigHandler
     {
         public PackageSchemaExecOptionsConfigHandler(IEntityGraphTypeBuilder entityGraphTypeBuilder,
-            IEntityGraphQueryArgumentsBuilder entityGraphQueryArgumentsBuilder)
+            IEntityGraphQueryArgumentsBuilder entityGraphQueryArgumentsBuilder,
+            IAsyncQueryProvider queryProvider,
+            IEnumerable<IEntityGraphQueryMiddlewareBuilder> entityGraphQueryMiddlewareBuilders)
         {
             EntityGraphTypeBuilder = entityGraphTypeBuilder ?? throw new ArgumentNullException(nameof(entityGraphTypeBuilder));
             EntityGraphQueryArgumentsBuilder = entityGraphQueryArgumentsBuilder
                 ?? throw new ArgumentNullException(nameof(entityGraphQueryArgumentsBuilder));
+
+            QueryProvider = queryProvider ?? throw new ArgumentNullException(nameof(queryProvider));
+            EntityGraphQueryMiddlewareBuilders = entityGraphQueryMiddlewareBuilders
+                ?? throw new ArgumentNullException(nameof(entityGraphQueryMiddlewareBuilders));
         }
 
         protected IEntityGraphTypeBuilder EntityGraphTypeBuilder { get; }
 
         protected IEntityGraphQueryArgumentsBuilder EntityGraphQueryArgumentsBuilder { get; }
+
+        protected IAsyncQueryProvider QueryProvider { get; }
+
+        protected IEnumerable<IEntityGraphQueryMiddlewareBuilder> EntityGraphQueryMiddlewareBuilders { get; }
 
         public void Configure(ExecutionOptions options)
         {
@@ -58,12 +70,16 @@ namespace AspNetCore.WebApi
                 arguments: EntityGraphQueryArgumentsBuilder.Build<Droid>(),
                 resolve: context =>
                 {
-                    var limit = context.GetArgument<int?>("limit");
-                    var offset = context.GetArgument<int?>("offset");
-                    var orderBy = context.GetArgument<IList<IDictionary<string, object>>>("order_by");
-                    var where = context.GetArgument<IDictionary<string, object>>("where");
+                    var queryableBuilder = new EntityGraphQueryBuilder<Droid>(QueryProvider);
+                    foreach(var middlewareBuilder in EntityGraphQueryMiddlewareBuilders)
+                    {
+                        queryableBuilder.Use(middlewareBuilder.Build<Droid>(context));
+                    }
+                    
+                    var queryable = queryableBuilder.Build();
+                    return queryable.ToList();
 
-                    return new[] { new Droid { Id = 1, Name = $"{packageName}-R1-D2" }, new Droid { Id = 2, Name = $"{packageName}-R2-D3" } };
+                    //return new[] { new Droid { Id = 1, Name = $"{packageName}-R1-D2" }, new Droid { Id = 2, Name = $"{packageName}-R2-D3" } };
                 });
 
             return new Schema { Query = root };

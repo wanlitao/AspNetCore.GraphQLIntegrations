@@ -43,7 +43,17 @@ namespace AspNetCore.WebApi
 
             services.AddSingleton<IEntityMapperProvider>((provider) => new EntityMapperProvider(typeof(DbEntityMapper<>)));
             services.AddSingleton<IEntityGraphTypeBuilder, EntityGraphTypeBuilder>();
+            services.AddSingleton<IEntityGraphQueryArgumentBuilder, LimitGraphQueryArgumentBuilder>();
+            services.AddSingleton<IEntityGraphQueryArgumentBuilder, OffsetGraphQueryArgumentBuilder>();
+            services.AddSingleton<IEntityGraphQueryArgumentBuilder, OrderByGraphQueryArgumentBuilder>();
+            services.AddSingleton<IEntityGraphQueryArgumentBuilder, PredicateGraphQueryArgumentBuilder>();
             services.AddSingleton<IEntityGraphQueryArgumentsBuilder, EntityGraphQueryArgumentsBuilder>();
+
+            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, LimitGraphQueryMiddlewareBuilder>();
+            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OffsetGraphQueryMiddlewareBuilder>();
+            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OrderByGraphQueryMiddlewareBuilder>();
+            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, PredicateGraphQueryMiddlewareBuilder>();
+            services.AddSingleton(typeof(IEntityGraphQueryBuilder<>), typeof(EntityGraphQueryBuilder<>));
 
             services.AddGraphQL(options =>
             {
