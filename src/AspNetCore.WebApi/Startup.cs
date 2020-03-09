@@ -3,7 +3,6 @@ using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
 using HEF.Entity.Mapper;
-using HEF.GraphQL.EntityQuery;
 using HEF.GraphQL.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,31 +28,11 @@ namespace AspNetCore.WebApi
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<OrderBy_Type>();
-            services.AddSingleton<IntComparisonExpr_Type>();
-            services.AddSingleton<StringComparisonExpr_Type>();
-
             services.AddSingleton<PackageType>();
-            //services.AddSingleton<DroidType>();
-            //services.AddSingleton<Droid_OrderBy_Type>();
-            //services.AddSingleton<Droid_Bool_Expr_Type>();
-
             services.AddSingleton<TestQuery_Root>();
             services.AddSingleton<ISchema, TestSchema>();
 
             services.AddSingleton<IEntityMapperProvider>((provider) => new EntityMapperProvider(typeof(DbEntityMapper<>)));
-            services.AddSingleton<IEntityGraphTypeBuilder, EntityGraphTypeBuilder>();
-            services.AddSingleton<IEntityGraphQueryArgumentBuilder, LimitGraphQueryArgumentBuilder>();
-            services.AddSingleton<IEntityGraphQueryArgumentBuilder, OffsetGraphQueryArgumentBuilder>();
-            services.AddSingleton<IEntityGraphQueryArgumentBuilder, OrderByGraphQueryArgumentBuilder>();
-            services.AddSingleton<IEntityGraphQueryArgumentBuilder, PredicateGraphQueryArgumentBuilder>();
-            services.AddSingleton<IEntityGraphQueryArgumentsBuilder, EntityGraphQueryArgumentsBuilder>();
-
-            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, LimitGraphQueryMiddlewareBuilder>();
-            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OffsetGraphQueryMiddlewareBuilder>();
-            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OrderByGraphQueryMiddlewareBuilder>();
-            services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, PredicateGraphQueryMiddlewareBuilder>();
-            services.AddSingleton(typeof(IEntityGraphQueryBuilder<>), typeof(EntityGraphQueryBuilder<>));
 
             services.AddGraphQL(options =>
             {
@@ -62,7 +41,8 @@ namespace AspNetCore.WebApi
             })
             .AddNewtonsoftJson()
             .AddUserContextBuilder((ctx) => new HttpContextItemsUserContext(ctx))
-            .AddExecOptionsConfigHandler<PackageSchemaExecOptionsConfigHandler>();
+            .AddExecOptionsConfigHandler<PackageSchemaExecOptionsConfigHandler>()
+            .AddEntityGraphQuery();
 
             services.Configure<IISServerOptions>(options =>
             {

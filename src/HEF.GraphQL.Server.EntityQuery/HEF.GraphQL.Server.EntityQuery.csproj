@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GraphQL.Server.Core" Version="3.5.0-alpha0064" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HEF.GraphQL.EntityQuery\HEF.GraphQL.EntityQuery.csproj" />
+  </ItemGroup>
+
+</Project>

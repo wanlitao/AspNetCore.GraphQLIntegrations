@@ -13,6 +13,8 @@ namespace HEF.GraphQL.EntityQuery
         public EntityGraphQueryBuilder(IAsyncQueryProvider queryProvider)
         {
             QueryProvider = queryProvider ?? throw new ArgumentNullException(nameof(queryProvider));
+
+            _middlewares = new List<Func<IQueryable<TEntity>, IQueryable<TEntity>>>();
         }
 
         protected IAsyncQueryProvider QueryProvider { get; }

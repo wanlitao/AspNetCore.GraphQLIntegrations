@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.Server.Ui.Playg
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HEF.GraphQL.EntityQuery", "src\HEF.GraphQL.EntityQuery\HEF.GraphQL.EntityQuery.csproj", "{4336C8E5-6D97-4465-B427-9BDA14AE97D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HEF.GraphQL.Server.EntityQuery", "src\HEF.GraphQL.Server.EntityQuery\HEF.GraphQL.Server.EntityQuery.csproj", "{4EA918E0-43FC-4A36-A8C2-B7BCBA59275F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4336C8E5-6D97-4465-B427-9BDA14AE97D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EA918E0-43FC-4A36-A8C2-B7BCBA59275F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EA918E0-43FC-4A36-A8C2-B7BCBA59275F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EA918E0-43FC-4A36-A8C2-B7BCBA59275F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EA918E0-43FC-4A36-A8C2-B7BCBA59275F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
