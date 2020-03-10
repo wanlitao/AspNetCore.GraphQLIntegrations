@@ -67,8 +67,6 @@ namespace AspNetCore.WebApi
                     var queryable = EntityGraphQueryResolver.Resolve<Customer>(context);
                     
                     return queryable.ToList();
-
-                    //return new[] { new Droid { Id = 1, Name = $"{packageName}-R1-D2" }, new Droid { Id = 2, Name = $"{packageName}-R2-D3" } };
                 });
 
             return new Schema { Query = root };

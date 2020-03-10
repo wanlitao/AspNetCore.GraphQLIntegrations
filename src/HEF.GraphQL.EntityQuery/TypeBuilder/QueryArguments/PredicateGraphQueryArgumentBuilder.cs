@@ -27,7 +27,7 @@ namespace HEF.GraphQL.EntityQuery
                 (key) => BuildEntityPredicateGraphTypeFactory<TEntity>(entityMapper.Properties.ToArray()));
 
             var entityPredicateType = entityPredicateGraphTypeFactory.Compile().Invoke();
-            return new QueryArgument(entityPredicateType) { Name = EntityGraphQueryConstants.GraphQueryArgumnet_Where_Name };
+            return new QueryArgument(entityPredicateType) { Name = EntityGraphQueryConstants.GraphQueryArgumnet_Where };
         }
 
         #region Helper Functions
@@ -93,7 +93,7 @@ namespace HEF.GraphQL.EntityQuery
             var predicateAndFieldTypeExpr = Expression.Call(_objectGraphFieldByGraphExtensionMethod, objectGraphFieldByGraphExtMethodParamExprs);
             bodyExprs.Add(predicateAndFieldTypeExpr);
 
-            // entityPredicateType.Field("_or", new ListGraphType(entityPredicateType));            
+            // entityPredicateType.Field("_or", new ListGraphType(entityPredicateType));
             objectGraphFieldByGraphExtMethodParamExprs = BuildObjectGraphFieldByGraphExtMethodParamExpressions(_objectGraphFieldByGraphExtensionMethod,
                 entityPredicateTypeVariableExpr, Expression.Constant("_or"), newListEntityPredicateTypeExpr);
             var predicateOrFieldTypeExpr = Expression.Call(_objectGraphFieldByGraphExtensionMethod, objectGraphFieldByGraphExtMethodParamExprs);
@@ -101,7 +101,7 @@ namespace HEF.GraphQL.EntityQuery
 
             if (properties.IsNotEmpty())
             {
-                foreach (var property in properties)
+                foreach (var property in properties.Where(p => !p.Ignored && !p.IsReadOnly))
                 {
                     // entityPredicateType.Field<ComparisonExpr_Type>(property.Name)
                     var propertyComparisonExprGraphType = property.PropertyInfo.PropertyType.GetComparisonExprGraphType();

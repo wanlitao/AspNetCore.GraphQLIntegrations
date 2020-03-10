@@ -28,7 +28,7 @@ namespace HEF.GraphQL.EntityQuery
             var entityOrderByType = entityOrderByGraphTypeFactory.Compile().Invoke();
             return new QueryArgument(new ListGraphType(new NonNullGraphType(entityOrderByType)))
             {
-                Name = EntityGraphQueryConstants.GraphQueryArgumnet_OrderBy_Name
+                Name = EntityGraphQueryConstants.GraphQueryArgumnet_OrderBy
             };
         }
 
@@ -66,7 +66,7 @@ namespace HEF.GraphQL.EntityQuery
 
             if (properties.IsNotEmpty())
             {
-                foreach (var property in properties)
+                foreach (var property in properties.Where(p => !p.Ignored && !p.IsReadOnly))
                 {
                     // entityOrderByType.Field<OrderBy_Type>(property.Name)
                     var fieldTypeExpr = GraphTypeBuilder.CreateObjectGraphFieldByGraphExpression(

@@ -16,11 +16,11 @@ namespace HEF.GraphQL.EntityQuery
 
         public bool? _is_null { get; set; }
 
-        public string[] _in { get; set; }
+        //public string[] _in { get; set; }
 
         public string _neq { get; set; }
 
-        public string[] _nin { get; set; }
+        //public string[] _nin { get; set; }
 
         public string _prelike { get; set; }
 

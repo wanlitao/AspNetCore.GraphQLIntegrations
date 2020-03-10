@@ -12,7 +12,7 @@ namespace GraphQL.Server
         {
             builder.Services.Replace(ServiceDescriptor.Transient(typeof(IGraphQLExecuter<>), typeof(ExecOptionsConfigGraphQLExecuter<>)));
 
-            builder.Services.AddSingleton<IExecOptionsConfigHandler, TExecOptionsConfigHandler>();
+            builder.Services.AddScoped<IExecOptionsConfigHandler, TExecOptionsConfigHandler>();
 
             return builder;
         }

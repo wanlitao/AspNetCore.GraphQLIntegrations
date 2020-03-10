@@ -12,7 +12,7 @@ namespace HEF.GraphQL.EntityQuery
             if (resolveFieldContext == null)
                 throw new ArgumentNullException(nameof(resolveFieldContext));
 
-            var limit = resolveFieldContext.GetArgument<int?>(EntityGraphQueryConstants.GraphQueryArgumnet_Limit_Name);
+            var limit = resolveFieldContext.GetArgument<int?>(EntityGraphQueryConstants.GraphQueryArgumnet_Limit);
 
             return queryable =>
             {

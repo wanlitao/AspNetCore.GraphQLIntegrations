@@ -63,7 +63,12 @@ namespace HEF.GraphQL.EntityQuery
                 {
                     yield return ExpressionFactory.BuildEntityPropertyExpression<TEntity>(property);
                     continue;
-                }                
+                }
+                if (methodParameter.ParameterType == typeof(bool))
+                {
+                    yield return Expression.Constant(property.KeyType == KeyType.NotAKey);
+                    continue;
+                }
                 yield return Expression.Constant(methodParameter.DefaultValue, methodParameter.ParameterType);                
             }
         }
@@ -89,7 +94,7 @@ namespace HEF.GraphQL.EntityQuery
 
             if (properties.IsNotEmpty())
             {
-                foreach (var property in properties)
+                foreach (var property in properties.Where(p => !p.Ignored))
                 {
                     var propertyType = property.PropertyInfo.PropertyType;
 

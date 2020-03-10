@@ -23,6 +23,7 @@ namespace GraphQL.Server
         {
             builder.Services.TryAddSingleton<OrderBy_Type>();
             builder.Services.TryAddSingleton<IntComparisonExpr_Type>();
+            builder.Services.TryAddSingleton<LongComparisonExpr_Type>();
             builder.Services.TryAddSingleton<StringComparisonExpr_Type>();
             builder.Services.TryAddSingleton<DecimalComparisonExpr_Type>();
             builder.Services.TryAddSingleton<DateTimeComparisonExpr_Type>();
@@ -49,8 +50,8 @@ namespace GraphQL.Server
             builder.Services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OrderByGraphQueryMiddlewareBuilder>();
             builder.Services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, PredicateGraphQueryMiddlewareBuilder>();
 
-            builder.Services.TryAddSingleton<IEntityGraphQueryBuilderFactory, EntityGraphQueryBuilderFactory>();
-            builder.Services.TryAddSingleton<IEntityGraphQueryResolver, EntityGraphQueryResolver>();
+            builder.Services.TryAddScoped<IEntityGraphQueryBuilderFactory, EntityGraphQueryBuilderFactory>();
+            builder.Services.TryAddScoped<IEntityGraphQueryResolver, EntityGraphQueryResolver>();
 
             return builder;
         }

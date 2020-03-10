@@ -33,6 +33,11 @@ namespace AspNetCore.WebApi
             services.AddSingleton<ISchema, TestSchema>();
 
             services.AddSingleton<IEntityMapperProvider>((provider) => new EntityMapperProvider(typeof(DbEntityMapper<>)));
+            services.AddMySqlConnection(Configuration.GetConnectionString("DefaultConnection"))
+                .AddSqlBuilder()
+                .AddMySqlFormatter()
+                .AddExpressionToMySql()
+                .AddEntityQueryable();
 
             services.AddGraphQL(options =>
             {

@@ -15,6 +15,7 @@ namespace HEF.GraphQL.EntityQuery
         private static void InitComparisonExprGraphMapping()
         {
             _comparisonExprGraphTypeMapping.Add(typeof(int), typeof(IntComparisonExpr_Type));
+            _comparisonExprGraphTypeMapping.Add(typeof(long), typeof(LongComparisonExpr_Type));
             _comparisonExprGraphTypeMapping.Add(typeof(decimal), typeof(DecimalComparisonExpr_Type));
             _comparisonExprGraphTypeMapping.Add(typeof(DateTime), typeof(DateTimeComparisonExpr_Type));
             _comparisonExprGraphTypeMapping.Add(typeof(string), typeof(StringComparisonExpr_Type));

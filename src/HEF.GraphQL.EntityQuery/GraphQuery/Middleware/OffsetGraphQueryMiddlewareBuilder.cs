@@ -12,7 +12,7 @@ namespace HEF.GraphQL.EntityQuery
             if (resolveFieldContext == null)
                 throw new ArgumentNullException(nameof(resolveFieldContext));
 
-            var offset = resolveFieldContext.GetArgument<int?>(EntityGraphQueryConstants.GraphQueryArgumnet_Offset_Name);
+            var offset = resolveFieldContext.GetArgument<int?>(EntityGraphQueryConstants.GraphQueryArgumnet_Offset);
 
             return queryable =>
             {

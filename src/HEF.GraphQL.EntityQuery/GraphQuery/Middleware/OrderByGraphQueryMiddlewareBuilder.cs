@@ -25,7 +25,7 @@ namespace HEF.GraphQL.EntityQuery
                 throw new ArgumentNullException(nameof(resolveFieldContext));
 
             var orderByArguments = resolveFieldContext.GetArgument<IList<IDictionary<string, object>>>(
-                EntityGraphQueryConstants.GraphQueryArgumnet_OrderBy_Name);
+                EntityGraphQueryConstants.GraphQueryArgumnet_OrderBy);
             var orderByProperties = GetOrderByProperties<TEntity>(orderByArguments);
 
             var queryableOrderByFactory = BuildQueryableOrderByFactory<TEntity>(orderByProperties.ToArray());
@@ -51,9 +51,8 @@ namespace HEF.GraphQL.EntityQuery
             foreach (var orderByItem in orderByArguments)
             {
                 foreach (var orderByField in orderByItem)
-                {
-                    var propertyName = orderByField.Key;
-                    var property = entityMapper.Properties.Single(p => string.Compare(p.Name, propertyName, true) == 0);
+                {                    
+                    var property = entityMapper.Properties.Single(p => string.Compare(p.Name, orderByField.Key, true) == 0);
                     var propertyOrderBy = ConvertToOrderBy(orderByField.Value.ParseInt());
 
                     yield return (property, propertyOrderBy);
@@ -70,42 +69,43 @@ namespace HEF.GraphQL.EntityQuery
             var bodyExprs = new List<Expression>();
 
             var index = 0;
+            var entityOrderedQueryableVariable = Expression.Variable(typeof(IOrderedQueryable<TEntity>), "orderedQueryable");
             foreach (var orderByProperty in orderByProperties)
             {
                 var orderByPropertyType = orderByProperty.Item1.PropertyInfo.PropertyType;
-                var entityPropertyExpr = ExpressionFactory.BuildEntityPropertyExpression<TEntity>(orderByProperty.Item1);
-                var checkOrderAscExpr = Expression.Equal(Expression.Constant(orderByProperty.Item2, typeof(OrderBy)), Expression.Constant(OrderBy.asc));
+                var entityOrderByPropertyExpr = ExpressionFactory.BuildEntityPropertyExpression<TEntity>(orderByProperty.Item1);
+                var isOrderAsc = orderByProperty.Item2 == OrderBy.asc;
                 if (index++ == 0)
                 {
-                    // queryable = item == OrderBy.asc ? queryable.OrderBy(x => x.PropertyName) : queryable.OrderByDescending(x => x.PropertyName)
+                    // orderedQueryable = item == OrderBy.asc ? queryable.OrderBy(x => x.PropertyName) : queryable.OrderByDescending(x => x.PropertyName)
                     var orderByFuncExpr = Expression.Call(QueryableMethods.OrderBy.MakeGenericMethod(typeof(TEntity), orderByPropertyType),
-                        entityQueryableParameter, entityPropertyExpr);
+                        entityQueryableParameter, entityOrderByPropertyExpr);
                     var orderByDescFuncExpr = Expression.Call(QueryableMethods.OrderByDescending.MakeGenericMethod(typeof(TEntity), orderByPropertyType),
-                        entityQueryableParameter, entityPropertyExpr);
+                        entityQueryableParameter, entityOrderByPropertyExpr);
 
-                    var orderByConditionExpr = Expression.Condition(checkOrderAscExpr, orderByFuncExpr, orderByDescFuncExpr);
-                    var assignQueryableExpr = Expression.Assign(entityQueryableParameter, orderByConditionExpr);
-                    bodyExprs.Add(assignQueryableExpr);
+                    var assignOrderedQueryableExpr = Expression.Assign(entityOrderedQueryableVariable, isOrderAsc ? orderByFuncExpr : orderByDescFuncExpr);
+                    bodyExprs.Add(assignOrderedQueryableExpr);
                 }
                 else
                 {
-                    // queryable = item == OrderBy.asc ? queryable.ThenBy(x => x.PropertyName) : queryable.ThenByDescending(x => x.PropertyName)
+                    // orderedQueryable = item == OrderBy.asc ? orderedQueryable.ThenBy(x => x.PropertyName) : orderedQueryable.ThenByDescending(x => x.PropertyName)
                     var thenByFuncExpr = Expression.Call(QueryableMethods.ThenBy.MakeGenericMethod(typeof(TEntity), orderByPropertyType),
-                        entityQueryableParameter, entityPropertyExpr);
+                        entityOrderedQueryableVariable, entityOrderByPropertyExpr);
                     var thenByDescFuncExpr = Expression.Call(QueryableMethods.ThenByDescending.MakeGenericMethod(typeof(TEntity), orderByPropertyType),
-                        entityQueryableParameter, entityPropertyExpr);
-
-                    var thenByConditionExpr = Expression.Condition(checkOrderAscExpr, thenByFuncExpr, thenByDescFuncExpr);
-                    var assignQueryableExpr = Expression.Assign(entityQueryableParameter, thenByConditionExpr);
-                    bodyExprs.Add(assignQueryableExpr);
+                        entityOrderedQueryableVariable, entityOrderByPropertyExpr);
+                    
+                    var assignOrderedQueryableExpr = Expression.Assign(entityOrderedQueryableVariable, isOrderAsc ? thenByFuncExpr : thenByDescFuncExpr);
+                    bodyExprs.Add(assignOrderedQueryableExpr);
                 }
             }
 
-            // code: return queryable;            
-            bodyExprs.Add(entityQueryableParameter);
+            // code: return (IQueryable<TEntity>)orderedQueryable;
+            var castResultExpr = Expression.Convert(entityOrderedQueryableVariable, entityQueryableType);
+            bodyExprs.Add(castResultExpr);
 
             var factoryBodyExpr = Expression.Block(
                 entityQueryableType, /* return type */
+                new[] { entityOrderedQueryableVariable } /* local variables */,
                 bodyExprs /* body expressions */);
 
             return Expression.Lambda<Func<IQueryable<TEntity>, IQueryable<TEntity>>>(factoryBodyExpr, entityQueryableParameter);
