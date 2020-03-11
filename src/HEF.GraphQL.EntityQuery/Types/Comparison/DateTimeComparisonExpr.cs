@@ -4,7 +4,7 @@ using System;
 namespace HEF.GraphQL.EntityQuery
 {
     public class DateTimeComparisonExpr : ComparisonExpr<DateTime>
-    {        
+    {
     }
 
     public class DateTimeComparisonExpr_Type : ComparisonExpr_Type<DateTimeGraphType>

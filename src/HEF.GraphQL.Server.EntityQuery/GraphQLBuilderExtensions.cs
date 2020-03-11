@@ -45,6 +45,21 @@ namespace GraphQL.Server
 
         public static IGraphQLBuilder AddEntityGraphQueryResolver(this IGraphQLBuilder builder)
         {
+            #region ComparisonExpression
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, EqualComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, GreaterThanComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, GreaterThanOrEqualComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, LessThanComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, LessThanOrEqualComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, IsNullComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, NotEqualComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, PrefixLikeComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, LikeComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, SuffixLikeComparisonExpressionBuilder>();
+
+            builder.Services.TryAddSingleton<IComparisonExpressionFactory, ComparisonExpressionFactory>();
+            #endregion
+
             builder.Services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, LimitGraphQueryMiddlewareBuilder>();
             builder.Services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OffsetGraphQueryMiddlewareBuilder>();
             builder.Services.AddSingleton<IEntityGraphQueryMiddlewareBuilder, OrderByGraphQueryMiddlewareBuilder>();

@@ -1,4 +1,5 @@
 ﻿using GraphQL;
+using HEF.Data.Query;
 using HEF.Entity.Mapper;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,17 @@ namespace HEF.GraphQL.EntityQuery
 {
     public class PredicateGraphQueryMiddlewareBuilder : IEntityGraphQueryMiddlewareBuilder
     {
-        public PredicateGraphQueryMiddlewareBuilder(IEntityMapperProvider mapperProvider)
+        public PredicateGraphQueryMiddlewareBuilder(IEntityMapperProvider mapperProvider,
+            IComparisonExpressionFactory comparisonExprFactory)
         {
             MapperProvider = mapperProvider ?? throw new ArgumentNullException(nameof(mapperProvider));
+
+            ComparisonExprFactory = comparisonExprFactory ?? throw new ArgumentNullException(nameof(comparisonExprFactory));
         }
 
         protected IEntityMapperProvider MapperProvider { get; }
+
+        protected IComparisonExpressionFactory ComparisonExprFactory { get; }
 
         public Func<IQueryable<TEntity>, IQueryable<TEntity>> Build<TEntity>(
             IResolveFieldContext resolveFieldContext) where TEntity : class
@@ -24,13 +30,10 @@ namespace HEF.GraphQL.EntityQuery
 
             var whereArguments = resolveFieldContext.GetArgument<IDictionary<string, object>>(
                 EntityGraphQueryConstants.GraphQueryArgumnet_Where);
-
             var entityPredicateExpr = GetEntityPredicateExpression<TEntity>(whereArguments);
 
-            return queryable =>
-            {
-                return queryable;
-            };
+            var queryablePredicateFactory = BuildQueryablePredicateFactory(entityPredicateExpr);
+            return queryablePredicateFactory.Compile();
         }
 
         #region Helper Functions
@@ -40,82 +43,65 @@ namespace HEF.GraphQL.EntityQuery
         protected virtual bool IsWherePredicateOr(string keyName)
             => string.Compare(keyName, EntityGraphQueryConstants.GraphQueryArgument_Where_Predicate_Or, true) == 0;
 
-        protected virtual Expression<Func<TEntity, bool>> GetEntityPredicateExpression<TEntity>(
-            IDictionary<string, object> whereArguments)
-            where TEntity : class
+        protected virtual Expression GetEntitySubPredicateExpression(IEntityMapper entityMapper,
+            ParameterExpression parameterExpr, object subWhereFieldValue,
+            Func<Expression, Expression, BinaryExpression> predicateCombineOperation)
         {
-            var entityMapper = MapperProvider.GetEntityMapper<TEntity>();
+            Expression subPredicateBodyExpr = null;
 
+            if (subWhereFieldValue is IList<object> subWherePredicates)
+            {
+                foreach (var subWherePredicate in subWherePredicates)
+                {
+                    if (subWherePredicate is IDictionary<string, object> subWhereArguments)
+                    {
+                        Expression subPredicateExpr = GetEntityPredicateExpression(entityMapper, parameterExpr, subWhereArguments);
+
+                        subPredicateBodyExpr = subPredicateBodyExpr == null ? subPredicateExpr
+                            : predicateCombineOperation(subPredicateBodyExpr, subPredicateExpr);
+                    }
+                }
+            }
+
+            return subPredicateBodyExpr;
+        }
+
+        protected virtual Expression GetEntityPredicateExpression(IEntityMapper entityMapper,
+            ParameterExpression parameterExpr, IDictionary<string, object> whereArguments)
+        {
             Expression predicateBodyExpr = null;
             Expression subAndPredicateBodyExpr = null;
             Expression subOrPredicateBodyExpr = null;
 
-            var parameterExpr = Expression.Parameter(typeof(TEntity), "entity");
             foreach (var whereField in whereArguments)
             {
                 if (IsWherePredicateAnd(whereField.Key))
                 {
-                    if (whereField.Value is IList<object> subAndWherePredicates)
-                    {
-                        foreach(var subAndWherePredicate in subAndWherePredicates)
-                        {
-                            if (subAndWherePredicate is IDictionary<string, object> subAndWhereArguments)
-                            {
-                                Expression subAndPredicateExpr = GetEntityPredicateExpression<TEntity>(subAndWhereArguments);
-
-                                subAndPredicateBodyExpr = (subAndPredicateBodyExpr == null) ? subAndPredicateExpr
-                                    : Expression.AndAlso(subAndPredicateBodyExpr, subAndPredicateExpr);
-                            }
-                        }
-                    }
+                    subAndPredicateBodyExpr = GetEntitySubPredicateExpression(entityMapper, parameterExpr,
+                        whereField.Value, Expression.AndAlso);
                     continue;
                 }
-                
+
                 if (IsWherePredicateOr(whereField.Key))
                 {
-                    if (whereField.Value is IList<object> subOrWherePredicates)
-                    {
-                        foreach (var subOrWherePredicate in subOrWherePredicates)
-                        {
-                            if (subOrWherePredicate is IDictionary<string, object> subOrWhereArguments)
-                            {
-                                Expression subOrPredicateExpr = GetEntityPredicateExpression<TEntity>(subOrWhereArguments);
-
-                                subOrPredicateBodyExpr = (subOrPredicateBodyExpr == null) ? subOrPredicateExpr
-                                    : Expression.OrElse(subOrPredicateBodyExpr, subOrPredicateExpr);
-                            }
-                        }
-                    }
+                    subOrPredicateBodyExpr = GetEntitySubPredicateExpression(entityMapper, parameterExpr,
+                        whereField.Value, Expression.OrElse);
                     continue;
                 }
-                
+
                 var whereProperty = entityMapper.Properties.Single(p => string.Compare(p.Name, whereField.Key, true) == 0);
-                if (whereField.Value is IDictionary<string, object> propertyComparisonExprs)
+                if (whereField.Value is IDictionary<string, object> propertyComparisons)
                 {
-                    if (propertyComparisonExprs.Count > 1)
+                    if (propertyComparisons.Count > 1)
                         throw new InvalidOperationException("every comparison type should only have one comparsion operation");
-
-                    var wherePropertyExpr = Expression.Property(parameterExpr, whereProperty.PropertyInfo);
-                    foreach (var propertyComparisonExpr in propertyComparisonExprs)
+                    
+                    foreach (var propertyComparison in propertyComparisons)
                     {
-                        var comparisonValueExpr = Expression.Constant(propertyComparisonExpr.Value, whereProperty.PropertyInfo.PropertyType);
-                        var propertyPredicateExpr = propertyComparisonExpr.Key switch
-                        {
-                            "_eq" => Expression.Equal(wherePropertyExpr, comparisonValueExpr),
-                            "_gt" => Expression.GreaterThan(wherePropertyExpr, comparisonValueExpr),
-                            "_gte" => Expression.GreaterThanOrEqual(wherePropertyExpr, comparisonValueExpr),
-                            "_lt" => Expression.LessThan(wherePropertyExpr, comparisonValueExpr),
-                            "_lte" => Expression.LessThanOrEqual(wherePropertyExpr, comparisonValueExpr),
-                            "_is_null" => Expression.Equal(wherePropertyExpr, comparisonValueExpr),
-                            "_neq" => Expression.NotEqual(wherePropertyExpr, comparisonValueExpr),
-                            "_prelike" => Expression.Equal(wherePropertyExpr, comparisonValueExpr),
-                            "_like" => Expression.Equal(wherePropertyExpr, comparisonValueExpr),
-                            "_suflike" => Expression.Equal(wherePropertyExpr, comparisonValueExpr),
-                            _ => throw new NotSupportedException($"target comparison '{propertyComparisonExpr.Key}' not supported")
-                        };
+                        var propertyComparisonExpr = ComparisonExprFactory.CreatePropertyComparisonExpression(parameterExpr,
+                            whereProperty, propertyComparison.Key, propertyComparison.Value);
 
-                        predicateBodyExpr = (predicateBodyExpr == null) ? propertyPredicateExpr
-                            : Expression.AndAlso(predicateBodyExpr, propertyPredicateExpr);
+                        predicateBodyExpr = predicateBodyExpr == null ? propertyComparisonExpr
+                            : Expression.AndAlso(predicateBodyExpr, propertyComparisonExpr);
                     }
                 }
             }
@@ -126,13 +112,30 @@ namespace HEF.GraphQL.EntityQuery
             if (subOrPredicateBodyExpr != null)
                 predicateBodyExpr = Expression.AndAlso(predicateBodyExpr, subOrPredicateBodyExpr);
 
+            return predicateBodyExpr;
+        }
+
+        protected virtual Expression<Func<TEntity, bool>> GetEntityPredicateExpression<TEntity>(
+            IDictionary<string, object> whereArguments)
+            where TEntity : class
+        {
+            var entityMapper = MapperProvider.GetEntityMapper<TEntity>();
+            var parameterExpr = Expression.Parameter(typeof(TEntity), "entity");
+
+            var predicateBodyExpr = GetEntityPredicateExpression(entityMapper, parameterExpr, whereArguments);
             return Expression.Lambda<Func<TEntity, bool>>(predicateBodyExpr, parameterExpr);
         }
 
-        protected static Expression<Func<IQueryable<TEntity>, IQueryable<TEntity>>> BuildQueryablePredicateFactory<TEntity>()
+        protected static Expression<Func<IQueryable<TEntity>, IQueryable<TEntity>>> BuildQueryablePredicateFactory<TEntity>(
+            Expression<Func<TEntity, bool>> entityPredicateExpr)
             where TEntity : class
         {
-            throw new NotImplementedException();
+            var entityQueryableParameter = Expression.Parameter(typeof(IQueryable<TEntity>), "queryable");
+
+            var queryableWhereFuncExpr = Expression.Call(QueryableMethods.Where.MakeGenericMethod(typeof(TEntity)),
+                entityQueryableParameter, entityPredicateExpr);
+
+            return Expression.Lambda<Func<IQueryable<TEntity>, IQueryable<TEntity>>>(queryableWhereFuncExpr, entityQueryableParameter);
         }
         #endregion
     }

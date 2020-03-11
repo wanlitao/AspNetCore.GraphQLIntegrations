@@ -26,7 +26,6 @@ namespace AspNetCore.WebApi
 
         protected IEntityGraphQueryResolver EntityGraphQueryResolver { get; }
 
-
         public void Configure(ExecutionOptions options)
         {
             var packageName = GetContextPackageName(options.UserContext);
