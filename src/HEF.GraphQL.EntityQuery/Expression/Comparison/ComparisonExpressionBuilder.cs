@@ -1,8 +1,8 @@
 ﻿using HEF.Entity.Mapper;
-using System.Linq.Expressions;
 using System;
-using System.Reflection;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace HEF.GraphQL.EntityQuery
 {
@@ -109,11 +109,19 @@ namespace HEF.GraphQL.EntityQuery
     {
         public string ComparisonType => "_is_null";
 
+        private static Func<Expression, Expression, Expression> GetNullComparisonOperation(object comparisonValue)
+        {
+            if (true.Equals(comparisonValue))
+                return Expression.Equal;
+
+            return Expression.NotEqual;
+        }
+
         public Expression BuildPropertyComparisonExpression(ParameterExpression entityParameter,
             IPropertyMap property, object comparisonValue)
         {
             return ComparisonExpressionBuilder.BuildPropertyComparisonExpression(entityParameter,
-                property, (property) => Expression.Constant(null), Expression.Equal);
+                    property, (property) => Expression.Constant(null), GetNullComparisonOperation(comparisonValue));
         }
     }
 

@@ -2,7 +2,6 @@ using GraphQL.Server;
 using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
-using HEF.Entity.Mapper;
 using HEF.GraphQL.Server.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,9 +30,9 @@ namespace AspNetCore.WebApi
             services.AddSingleton<PackageType>();
             services.AddSingleton<TestQuery_Root>();
             services.AddSingleton<ISchema, TestSchema>();
-
-            services.AddSingleton<IEntityMapperProvider>((provider) => new EntityMapperProvider(typeof(DbEntityMapper<>)));
+            
             services.AddMySqlConnection(Configuration.GetConnectionString("DefaultConnection"))
+                .AddEntityMapperProvider(typeof(DbEntityMapper<>))
                 .AddSqlBuilder()
                 .AddMySqlFormatter()
                 .AddExpressionToMySql()

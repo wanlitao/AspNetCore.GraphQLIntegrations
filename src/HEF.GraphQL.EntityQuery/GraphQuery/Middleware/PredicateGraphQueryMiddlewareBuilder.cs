@@ -70,22 +70,28 @@ namespace HEF.GraphQL.EntityQuery
             ParameterExpression parameterExpr, IDictionary<string, object> whereArguments)
         {
             Expression predicateBodyExpr = null;
-            Expression subAndPredicateBodyExpr = null;
-            Expression subOrPredicateBodyExpr = null;
 
             foreach (var whereField in whereArguments)
             {
                 if (IsWherePredicateAnd(whereField.Key))
                 {
-                    subAndPredicateBodyExpr = GetEntitySubPredicateExpression(entityMapper, parameterExpr,
+                    var subAndPredicateBodyExpr = GetEntitySubPredicateExpression(entityMapper, parameterExpr,
                         whereField.Value, Expression.AndAlso);
+
+                    predicateBodyExpr = predicateBodyExpr == null ? subAndPredicateBodyExpr
+                            : Expression.AndAlso(predicateBodyExpr, subAndPredicateBodyExpr);
+
                     continue;
                 }
 
                 if (IsWherePredicateOr(whereField.Key))
                 {
-                    subOrPredicateBodyExpr = GetEntitySubPredicateExpression(entityMapper, parameterExpr,
+                    var subOrPredicateBodyExpr = GetEntitySubPredicateExpression(entityMapper, parameterExpr,
                         whereField.Value, Expression.OrElse);
+
+                    predicateBodyExpr = predicateBodyExpr == null ? subOrPredicateBodyExpr
+                            : Expression.AndAlso(predicateBodyExpr, subOrPredicateBodyExpr);
+
                     continue;
                 }
 
@@ -105,12 +111,6 @@ namespace HEF.GraphQL.EntityQuery
                     }
                 }
             }
-
-            if (subAndPredicateBodyExpr != null)
-                predicateBodyExpr = Expression.AndAlso(predicateBodyExpr, subAndPredicateBodyExpr);
-
-            if (subOrPredicateBodyExpr != null)
-                predicateBodyExpr = Expression.AndAlso(predicateBodyExpr, subOrPredicateBodyExpr);
 
             return predicateBodyExpr;
         }
