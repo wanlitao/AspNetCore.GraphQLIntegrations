@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageReference Include="GraphQL" Version="3.0.0-preview-1585" />
     <PackageReference Include="HEF.Data.Query" Version="1.0.1" />
-    <PackageReference Include="HEF.Entity" Version="1.0.2" />
   </ItemGroup>
 
 </Project>
