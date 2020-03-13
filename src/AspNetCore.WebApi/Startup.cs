@@ -43,15 +43,15 @@ namespace AspNetCore.WebApi
                 options.EnableMetrics = false;
                 options.ExposeExceptions = true;
             })
-            .AddNewtonsoftJson()
+            .AddSystemTextJson()
             .AddUserContextBuilder((ctx) => new HttpContextItemsUserContext(ctx))
             .AddExecOptionsConfigHandler<PackageSchemaExecOptionsConfigHandler>()
             .AddEntityGraphQuery();
 
-            services.Configure<IISServerOptions>(options =>
-            {
-                options.AllowSynchronousIO = true;
-            });
+            //services.Configure<IISServerOptions>(options =>
+            //{
+            //    options.AllowSynchronousIO = true;
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
