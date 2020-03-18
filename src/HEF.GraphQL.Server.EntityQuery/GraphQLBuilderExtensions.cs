@@ -52,7 +52,9 @@ namespace GraphQL.Server
             builder.Services.AddSingleton<IComparisonExpressionBuilder, LessThanComparisonExpressionBuilder>();
             builder.Services.AddSingleton<IComparisonExpressionBuilder, LessThanOrEqualComparisonExpressionBuilder>();
             builder.Services.AddSingleton<IComparisonExpressionBuilder, IsNullComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, InComparisonExpressionBuilder>();
             builder.Services.AddSingleton<IComparisonExpressionBuilder, NotEqualComparisonExpressionBuilder>();
+            builder.Services.AddSingleton<IComparisonExpressionBuilder, NotInComparisonExpressionBuilder>();
             builder.Services.AddSingleton<IComparisonExpressionBuilder, PrefixLikeComparisonExpressionBuilder>();
             builder.Services.AddSingleton<IComparisonExpressionBuilder, LikeComparisonExpressionBuilder>();
             builder.Services.AddSingleton<IComparisonExpressionBuilder, SuffixLikeComparisonExpressionBuilder>();

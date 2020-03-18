@@ -1,5 +1,8 @@
-﻿using HEF.Entity.Mapper;
+﻿using GraphQL;
+using HEF.Data.Query;
+using HEF.Entity.Mapper;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -8,7 +11,7 @@ namespace HEF.GraphQL.EntityQuery
 {
     internal static class ComparisonExpressionBuilder
     {
-        private static Func<IPropertyMap, ConstantExpression> BuildComparisonValueGetter(object comparisonValue)
+        internal static Func<IPropertyMap, ConstantExpression> BuildComparisonValueGetter(object comparisonValue)
         {
             return (property) =>
             {
@@ -16,6 +19,20 @@ namespace HEF.GraphQL.EntityQuery
                     throw new ArgumentNullException(nameof(comparisonValue));
 
                 return Expression.Constant(comparisonValue, property.PropertyInfo.PropertyType);
+            };
+        }
+
+        internal static Func<IPropertyMap, ConstantExpression> BuildEnumerableComparisonValueGetter(object comparisonValue)
+        {
+            return (property) =>
+            {
+                if (comparisonValue == null)
+                    throw new ArgumentNullException(nameof(comparisonValue));
+
+                var enumerablePropertyType = typeof(IEnumerable<>).MakeGenericType(property.PropertyInfo.PropertyType);
+                var enumerableComparisonValue = comparisonValue.GetPropertyValue(enumerablePropertyType);
+
+                return Expression.Constant(enumerableComparisonValue, enumerablePropertyType);
             };
         }
 
@@ -134,6 +151,36 @@ namespace HEF.GraphQL.EntityQuery
         {
             return ComparisonExpressionBuilder.BuildPropertyComparisonExpression(entityParameter,
                 property, comparisonValue, Expression.NotEqual);
+        }
+    }
+
+    public class InComparisonExpressionBuilder : IComparisonExpressionBuilder
+    {
+        public string ComparisonType => "_in";
+
+        public Expression BuildPropertyComparisonExpression(ParameterExpression entityParameter,
+            IPropertyMap property, object comparisonValue)
+        {
+            var enumerableContainsMethod = EnumerableMethods.Contains.MakeGenericMethod(property.PropertyInfo.PropertyType);
+
+            return ComparisonExpressionBuilder.BuildPropertyComparisonExpression(
+                entityParameter, property, ComparisonExpressionBuilder.BuildEnumerableComparisonValueGetter(comparisonValue),
+                (propertyExpr, comparisonValueExpr) => Expression.Call(enumerableContainsMethod, comparisonValueExpr, propertyExpr));
+        }
+    }
+
+    public class NotInComparisonExpressionBuilder : IComparisonExpressionBuilder
+    {
+        public string ComparisonType => "_nin";
+
+        public Expression BuildPropertyComparisonExpression(ParameterExpression entityParameter,
+            IPropertyMap property, object comparisonValue)
+        {
+            var enumerableContainsMethod = EnumerableMethods.Contains.MakeGenericMethod(property.PropertyInfo.PropertyType);
+
+            return ComparisonExpressionBuilder.BuildPropertyComparisonExpression(
+                entityParameter, property, ComparisonExpressionBuilder.BuildEnumerableComparisonValueGetter(comparisonValue),
+                (propertyExpr, comparisonValueExpr) => Expression.Not(Expression.Call(enumerableContainsMethod, comparisonValueExpr, propertyExpr)));
         }
     }
 
