@@ -2,7 +2,8 @@ using GraphQL.Server;
 using GraphQL.Server.Ui.GraphiQL;
 using GraphQL.Server.Ui.Playground;
 using GraphQL.Types;
-using HEF.Extensions.GraphQL.Server.AspNetCore;
+using HEF.GraphQL.Server.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -44,10 +45,20 @@ namespace AspNetCore.WebApi
                 options.ExposeExceptions = true;
             })
             .AddSystemTextJson()
-            .AddUserContextBuilder((ctx) => new HttpContextItemsUserContext(ctx))
+            .AddUserContextBuilder((ctx) => new HttpContextUserContext(ctx))
             .AddExecOptionsConfigHandler<PackageSchemaExecOptionsConfigHandler>()
-            .AddEntityGraphQuery();
+            .AddEntityGraphQuery()
+            .AddGraphQLAuthorization(options => options.AddPolicy("DeveloperPolicy", policy => policy.RequireClaim("DeveloperId")));
+            
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddIdentityServerAuthentication(options =>
+                {
+                    options.Authority = _appSettings["IdentityServer_Address"];
+                    options.RequireHttpsMetadata = false;
 
+                    options.ApiName = "CDCApi_Developer";
+                });
+            
             //services.Configure<IISServerOptions>(options =>
             //{
             //    options.AllowSynchronousIO = true;
@@ -61,6 +72,8 @@ namespace AspNetCore.WebApi
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseAuthentication();
 
             app.UseGraphQL<ISchema>("/packages/graphql");
             app.UseGraphiQLServer(new GraphiQLOptions { Path = "/packages/graphiql", GraphQLEndPoint = "/packages/graphql" });

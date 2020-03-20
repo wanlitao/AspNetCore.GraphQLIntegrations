@@ -1,7 +1,7 @@
 ﻿using GraphQL;
 using GraphQL.Types;
-using HEF.Extensions.GraphQL.EntityQuery;
-using HEF.Extensions.GraphQL.Server;
+using HEF.GraphQL.EntityQuery;
+using HEF.GraphQL.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;

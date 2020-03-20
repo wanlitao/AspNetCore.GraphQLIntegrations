@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 namespace HEF.GraphQL.Server.AspNetCore
 {
-    public class HttpContextItemsUserContext : Dictionary<string, object>
+    public class HttpContextUserContext : Dictionary<string, object>
     {
-        public HttpContextItemsUserContext(HttpContext httpContext)
+        public HttpContextUserContext(HttpContext httpContext)
         {
             Context = httpContext ?? throw new ArgumentNullException(nameof(httpContext));
 
             FillHttpContextItems(httpContext);
         }
 
-        protected HttpContext Context { get; }
+        public HttpContext Context { get; }
 
         protected void FillHttpContextItems(HttpContext httpContext)
         {

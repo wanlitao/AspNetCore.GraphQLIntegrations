@@ -1,4 +1,5 @@
-﻿using GraphQL.Types;
+﻿using GraphQL.Server.Authorization.AspNetCore;
+using GraphQL.Types;
 
 namespace AspNetCore.WebApi
 {
@@ -18,7 +19,7 @@ namespace AspNetCore.WebApi
                         new Package { Name = "pkg_abcdefg", GraphQLEndPoint = "/packages/pkg_abcdefg/graphql" }
                     };
                 }
-            );
+            ).AuthorizeWith("DeveloperPolicy");
         }
     }
 
