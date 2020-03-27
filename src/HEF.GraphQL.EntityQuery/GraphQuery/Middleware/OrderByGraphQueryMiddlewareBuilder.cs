@@ -26,6 +26,9 @@ namespace HEF.GraphQL.EntityQuery
 
             var orderByArguments = resolveFieldContext.GetArgument<IList<IDictionary<string, object>>>(
                 EntityGraphQueryConstants.GraphQueryArgumnet_OrderBy);
+            if (orderByArguments.IsEmpty())
+                return queryable => queryable;
+
             var orderByProperties = GetOrderByProperties<TEntity>(orderByArguments);
 
             var queryableOrderByFactory = BuildQueryableOrderByFactory<TEntity>(orderByProperties.ToArray());

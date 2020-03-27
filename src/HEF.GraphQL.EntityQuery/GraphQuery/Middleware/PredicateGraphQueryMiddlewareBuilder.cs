@@ -30,6 +30,9 @@ namespace HEF.GraphQL.EntityQuery
 
             var whereArguments = resolveFieldContext.GetArgument<IDictionary<string, object>>(
                 EntityGraphQueryConstants.GraphQueryArgumnet_Where);
+            if (whereArguments == null || whereArguments.Count == 0)
+                return queryable => queryable;
+
             var entityPredicateExpr = GetEntityPredicateExpression<TEntity>(whereArguments);
 
             var queryablePredicateFactory = BuildQueryablePredicateFactory(entityPredicateExpr);

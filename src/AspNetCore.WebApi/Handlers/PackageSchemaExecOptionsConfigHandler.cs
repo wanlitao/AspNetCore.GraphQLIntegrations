@@ -54,17 +54,29 @@ namespace AspNetCore.WebApi
             if (string.IsNullOrWhiteSpace(packageName))
                 throw new ArgumentNullException(nameof(packageName));
 
-            var customerType = EntityGraphTypeBuilder.Build<Customer>();
+            var root = new ObjectGraphType { Name = $"{packageName}_Query_Root", Description = $"query root for package: {packageName}" };
 
-            var root = new ObjectGraphType { Name = $"{packageName}_Query_Root", Description = $"query root for package: {packageName}" };            
+            var customerType = EntityGraphTypeBuilder.Build<Customer>();
             root.Field(
-                "Customer",
+                nameof(Customer),
                 new ListGraphType(new NonNullGraphType(customerType)),
                 arguments: EntityGraphQueryArgumentsBuilder.Build<Customer>(),
                 resolve: context =>
                 {
                     var queryable = EntityGraphQueryResolver.Resolve<Customer>(context);
                     
+                    return queryable.ToList();
+                });
+
+            var accountType = EntityGraphTypeBuilder.Build<Account>();
+            root.Field(
+                nameof(Account),
+                new ListGraphType(new NonNullGraphType(accountType)),
+                arguments: EntityGraphQueryArgumentsBuilder.Build<Account>(),
+                resolve: context =>
+                {
+                    var queryable = EntityGraphQueryResolver.Resolve<Account>(context);
+
                     return queryable.ToList();
                 });
 

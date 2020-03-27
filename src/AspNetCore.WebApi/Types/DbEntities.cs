@@ -14,4 +14,15 @@ namespace AspNetCore.WebApi
         public DateTime createTime { get; set; }
         public string IsDel { get; set; }
     }
+
+    public class Account
+    {
+        public long id { get; set; }
+        public string LoginName { get; set; }
+        public string Password { get; set; }
+        public string Name { get; set; }
+        public string Sex { get; set; }        
+        public DateTime createTime { get; set; }
+        public string IsDel { get; set; }
+    }
 }
