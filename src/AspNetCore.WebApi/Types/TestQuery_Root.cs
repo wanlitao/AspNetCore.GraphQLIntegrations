@@ -11,7 +11,7 @@ namespace AspNetCore.WebApi
                 "Package",
                 resolve: context =>
                 {
-                    return new[] { 
+                    return new[] {
                         new Package { Name = "pkg_abc", GraphQLEndPoint = "/packages/pkg_abc/graphql" },
                         new Package { Name = "pkg_abcd", GraphQLEndPoint = "/packages/pkg_abcd/graphql" },
                         new Package { Name = "pkg_abcde", GraphQLEndPoint = "/packages/pkg_abcde/graphql" },
@@ -19,7 +19,7 @@ namespace AspNetCore.WebApi
                         new Package { Name = "pkg_abcdefg", GraphQLEndPoint = "/packages/pkg_abcdefg/graphql" }
                     };
                 }
-            ).AuthorizeWith("DeveloperPolicy");
+            );
         }
     }
 

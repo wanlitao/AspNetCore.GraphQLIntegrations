@@ -1,6 +1,9 @@
-﻿using HEF.GraphQL.EntityQuery;
+﻿using GraphQL.Types;
+using GraphQL.Utilities;
+using HEF.GraphQL.EntityQuery;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
 
 namespace GraphQL.Server
 {
@@ -8,6 +11,7 @@ namespace GraphQL.Server
     {
         public static IGraphQLBuilder AddEntityGraphQuery(this IGraphQLBuilder builder)
         {
+            GraphTypeTypeRegistry.Register<DateTime, DateTimeGraphType>(); //fix DateTime GraphType mapping
             builder.Services.TryAddSingleton<IEntityGraphTypeBuilder, EntityGraphTypeBuilder>();
 
             builder.AddEntityGraphQueryTypes();

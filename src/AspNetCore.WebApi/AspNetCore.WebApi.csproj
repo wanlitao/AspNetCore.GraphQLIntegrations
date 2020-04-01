@@ -11,6 +11,7 @@
     <PackageReference Include="HEF.Data.MySql" Version="1.0.1" />
     <PackageReference Include="HEF.Entity" Version="1.0.2" />
     <PackageReference Include="HEF.Expressions.Sql.MySql" Version="1.0.4" />
+    <PackageReference Include="HEF.Extensions.SystemTextJson" Version="1.0.0" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
   </ItemGroup>
 
